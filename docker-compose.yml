@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # 1. データベース用のコンテナ（MySQL 8.0）
+  db:
+    image: mysql:8.0
+    container_name: stepflow-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ROOT
+      MYSQL_DATABASE: stepflow_db
+      MYSQL_USER: stepflow_user
+      MYSQL_PASSWORD: ROOT
+    ports:
+      - "3306:3306" # 🌟ローカルの3306番ポートと繋ぐ
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # 2. Java（Spring Boot）実行用のコンテナ
+  web:
+    image: eclipse-temurin:17-jdk-focal
+    container_name: stepflow-app
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - "8080:8080" # 🌟おなじみの8080番ポートでWEB画面を開けるようにする
+    depends_on:
+      - db # 🌟DBが立ち上がってからJavaを起動する設定
+
+volumes:
+  mysql_data:

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8" />
+	<title>ユーザー新規登録-管理システム</title>
+</head>
+<style>
+        .form-group { margin-bottom: 15px; }
+        label { display: inline-block; width: 100px; }
+    </style>
+<body>
+	<h1 style="text-align: center;" th:text="${user.userId == null} ?  'ユーザー新規登録（管理者用）' : 'ユーザー編集(管理者用)'" >
+		</h1>
+	<div th:if="${successMessage}" style="color: green; text-align: center; margin-bottom: 20px;">
+        <p th:text="${successMessage}"></p>
+	</div>
+	<form th:action="@{/users}" th:object="${user}" method="post" style="width: 300px; margin: 0 auto;">
+	    
+	    <div th:if="${#fields.hasErrors('userName')}" style="color: red; text-align: center; margin-bottom: 20px;">
+	        <p th:errors="*{userName}"></p> </div>
+        <div class="form-group">
+			<input type="hidden" th:field="*{userId}"/>
+            <label >名前:</label>
+			<!--th:field="*{name}"`は、フォームの入力フィールドとモデルオブジェクトのプロパティをバインドするためのThymeleafの属性です。
+			→th:object="${user}"でのセットアップが必要(formタグにて)
+			`th:field="*{name}"`は、ユーザーが入力した値をモデルオブジェクトの`name`プロパティに自動的にバインドします。
+			これにより、ユーザーが入力した値が自動的にモデルオブジェクトの対応するプロパティにセットされます。
+			例えば、`th:field="*{name}"`は、ユーザーが入力した名前をモデルオブジェクトの`name`プロパティにバインドします。
+			これにより、フォーム送信後にコントローラーで簡単にユーザーの名前を取得できるようになります。
+			labelのid要素も自動生成。name=機能も自動生成してくれる優れモノ`-->
+            <input type="text" th:field="*{userName}" placeholder="氏名を入力してください"   />
+        </div>
+		<div class="form-group">
+            <label>性別:</label>
+			<select th:field="*{userGender}" required>
+				<option value="" disabled selected>性別を選択してください</option>
+				<option value="1">男</option>
+				<option value="2">女</option>
+				<option value="3">その他</option>
+			</select>
+			<p th:if="${#fields.hasErrors('userGender')}" th:errors="*{userGender}" style="color: red;"></p>
+        </div>
+		<div class="form-group" >
+             <label>権限:</label>
+             <select th:field="*{authorityId}" >
+                 <option value="" disabled selected>権限を選択してください</option>
+                 <option value="1">管理者</option>
+                 <option value="2">店舗スタッフ</option>
+				 <option value="3">倉庫スタッフ</option>
+             </select>
+			 <p th:if="${#fields.hasErrors('authorityId')}" th:errors="*{authorityId}" style="color: red;"></p>
+        </div>
+		<div class="form-group" id="shop-group">
+			 <label >所属店舗:</label>
+			 <input type="text" th:field="*{shopId}" id="shopId" />
+			 <p th:if="${#fields.hasErrors('shopId')}" th:errors="*{shopId}" style="color:red;"></p>
+		</div>	 
+		<div class="form-group" id="warehouse-group">
+				<label >所属倉庫:</label>
+				 <input type="text" th:field="*{warehouseId}" id="warehouseId" />
+				 <p th:if="${#fields.hasErrors('warehouseId')}" th:errors="*{warehouseId}" style="color:red;"></p>
+		</div>
+		<div class="form-group">
+         	<label>パスワード:</label>
+			<input type="password" th:field="*{userPassword}" placeholder="パスワードを入力してください" required />
+			<p th:if="${#fields.hasErrors('userPassword')}"th:errors="*{userPassword}"style="color:red"></p> 
+		</div>
+        
+		<button type="submit" style="display: block; margin: 20px auto;">登録</button>
+    </form>
+	
+	<hr>
+	<a th:href="@{/users}" style="display: block; text-align: center;">ユーザー一覧に戻る</a>
+	
+	<script>
+		document.addEventListener('DOMContentLoaded', function(){
+			const roleSelect = document.getElementById('authorityId');//権限の選択フィールド
+			const shopGroup = document.getElementById('shop-group');//所属店舗の入力フィールド
+			const warehouseGroup = document.getElementById('warehouse-group');//所属の入力フィールド
+			
+			function toggleAffiliation() {
+				const selectedRole = roleSelect.value;
+				//権限がSHOPまたはWAREHOUSEの場合、所属の入力フィールドを表示。それ以外は非表示にする
+					//初期状態では両方とも非表示にする
+					shopGroup.style.display ='none' ;//所属店舗の入力フィールドを非表示
+					warehouseGroup.style.display = 'none';//所属倉庫の入力フィールド
+					
+					if(selectedRole =="2"){//店舗スタッフが選択された場合
+                    shopGroup.style.display = 'block';//所属店舗の入力フィールドを表示
+		    	}else if(selectedRole =="3"){//倉庫スタッフが選択された場合
+                    warehouseGroup.style.display = 'block';//所属倉庫の入力フィールドを表示
+				}
+             
+                
+            }
+			
+			//画面が開いたときと選択肢が変化したときに実行
+			roleSelect.addEventListener('change', toggleAffiliation);//権限の選択肢が変更されたときにtoggleAffiliation関数を呼び出す
+			toggleAffiliation();//初期状態を設定
+		});
+		</script>
+			
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="sidebar-fragment" class="sidebar">
+    <h2>サイドバー</h2>
+		<p class="login-info">ログイン中: <span th:text="${loginUsername}">ユーザー名</span></p>
+	<hr>
+	<a th:href="@{/home}">ホーム</a>
+	<a th:href="@{/contact}">管理者へお問い合わせ</a>
+	
+	<div th:if="${authorityId == 'ROLE_ADMIN' || authorityId == 'ADMIN'}">
+	        <p class="role-label role-admin">管理者メニュー</p>
+	        <a th:href="@{/users}">ユーザー一覧・登録</a>
+	        <a th:href="@{/system-settings}">システム設定</a>
+	    </div>
+	    
+		<div th:if="${authorityId == 'ROLE_SHOP' || authorityId == 'SHOP'}">
+	        <p class="role-label role-shop">店舗業務メニュー</p>
+	        <a th:href="@{/shop/sales}">売上入力・確認</a>
+	        <a th:href="@{/shop/order}">店舗発注申請</a>
+	    </div>
+	    
+		<div th:if="${authorityId == 'ROLE_WAREHOUSE' || authorityId == 'WAREHOUSE'}">
+	        <p class="role-label role-warehouse">倉庫業務メニュー</p>
+	        <a th:href="@{/warehouse/stock}">出荷指示一覧</a>
+	        <a th:href="@{/warehouse/inventory}">在庫棚卸管理</a>
+	 </div>
+	
+	<hr class="logout-hr">
+	
+	<form th:action="@{/logout}" method="post">
+		<button type="submit" class="logout-btn">ログアウト</button>
+	</form>
+	
+	
+</div>
+</html>

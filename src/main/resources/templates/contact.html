@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html>
+<head>
+<meta charset="UTF-8">
+<title>管理者お問い合わせ</title>
+<link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+		.contact-container { margin-left: 270px; padding: 30px; max-width: 600px; }
+		.form-group { margin-bottom: 20px; }
+		.form-group label { display: block; margin-bottom: 8px; font-weight: bold; }
+		.form-control { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+		.btn-submit { background-color: #007bff; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; }
+		.btn-submit:hover { background-color: #0056b3; }
+	</style>
+</head>
+<body>
+<div
+	th:replace="~{sidebar ::sidebar-fragment}">
+</div>
+	 
+	 <h2>管理者へお問い合わせ</h2>
+	 <hr>
+	
+	 <form th:action="@{/contact/confirm}" method="post">
+     	<div class="form-group">
+			<label for-="receiverRole" style="color:red;">送信先</label>
+			<select id="receiverRole" class="form-control" name="receiverRole">
+			  <option value="">送信先を選択してください</option>
+			  <option value="ROLE_ADMIN" th:unless="${authorityId == 'ROLE_ADMIN'}" >管理者</option>
+			  <option value="ROLE_SHOP" th:unless="${authorityId == 'ROLE_SHOP'}"> 店舗スタッフ</option>
+		       <option value="ROLE_WAREHOUSE" th:unless="${authorityId == 'ROLE_WEREHOUSE'}"> 倉庫スタッフ</option>
+			</select>
+		   	 </div>
+	<div class="form-group">
+		<label for="partnerId">連絡先（店舗/倉庫を選択時のみ必須）</label>
+		<select id="partnerId" name="partnerId" class="form-control">
+			<option value="">--連携先を選択してください--</option>
+			<option th:each ="partner : ${partnerList}"
+			th:value="${partner.id}"
+			th:text="${partner.name}">
+			</option>
+		</select>
+	</div>
+	
+	<div class="form-group">
+        <label for="content" style="color: red;">お問い合わせ内容</label>
+        <textarea  id="content" name="content" class="form-control" rows="6" 
+		            maxlength="255" placeholder="お問い合わせ内容を入力してください（255文字以内）" ></textarea>
+ 
+		<button type="submit" clas="btn-submit">送信する</button>
+	 </form>
+	 </div>
+
+	<script>
+		document.addEventListener("DOMContentLoaded", function(){
+			const receiverRoleSelect = document.getElementById("receiverRole");
+			const partnerIdSelect = document.getElementById("partnerId");
+			
+			receiverRoleSelect.addEventListener('change', function(){
+				const selectedRole = this.value;
+				
+				//送信先が店舗(ROLE_SHOP)または倉庫(ROLE_WAREHOUSE)の場合のみ活性化
+				if(selectedRole === 'ROLE_SHOP' || selectedRole === 'ROLE_WAREHOUSE'){
+					partnerIdSelect.disabled = false;
+					partnerIdSelect.required = true;
+				}else{
+					partnerIdSelect.disabled = true;
+					partnerIdSelect.required = false;
+					partnerIdSelect.value = ""; //選択をリセット
+					
+				}
+			});
+			});
+
+	</script>
+	</body>
+</html>

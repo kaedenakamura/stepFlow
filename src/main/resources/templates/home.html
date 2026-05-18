@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>StepFlow - ホーム</title>
+	<style>
+		body { font-family:"sans-serif" ; margin: 0; padding: 0; display: flex; background: #f8fafc; overflow-x: hidden; }
+	   /*ハンバーガーボタン*/
+	   .menu-trigger {
+	               position: fixed; top: 20px; left: 20px; z-index: 1000;
+	               background: #2c3e50; color: #fff; border: none;
+	               padding: 12px 16px; font-size: 20px; border-radius: 6px; cursor: pointer;
+	               box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s ease;
+	           }
+	   /* サイドバー共通スタイル（部品側と連動） */
+	   .sidebar {
+	               position: fixed; top: 0; left: -260px; width: 260px; height: 100vh;
+	               background: #1e293b; color: #f8fafc; padding: 30px 20px; box-sizing: border-box;
+	               transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 900;
+	           }
+	           .sidebar h2 { font-size: 24px; color: #38bdf8; margin-bottom: 25px; margin-top: 40px; border-left: 4px solid #38bdf8; padding-left: 10px; }
+	           .sidebar a { color: #cbd5e1; display: block; padding: 12px 0; text-decoration: none; border-bottom: 1px solid #334155; font-size: 15px; }
+	           .sidebar a:hover { color: #fff; background: #334155; padding-left: 5px; }
+	           .login-info { font-size: 13px; color: #94a3b8; }
+	           .role-label { font-size: 11px; margin-top: 25px; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+	           .role-admin { color: #f87171; }
+	           .role-shop { color: #fbbf24; }
+	           .role-warehouse { color: #38bdf8; }
+	           .logout-btn { background: #ef4444; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; }
+	  /* メインコンテンツ */
+	  .main-content { flex: 1; padding: 40px; padding-top: 100px; transition: 0.3s; }
+	  .welcome-box { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); max-width: 1200px; }
+	  .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; } 
+	  
+	  /* 開封時の動き */
+	  body.is-open .sidebar { left: 0; }
+	  body.is-open .menu-trigger { left: 280px; }    
+	  
+		
+	
+    </style>
+	</head>
+	<body>
+		<button class="menu-trigger" id="js-hamburger">☰</button>
+		<div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+		
+		<main class="main-content">
+			<div class="welcome-box">
+			
+			    <h1>ホームページ</h1>
+		        <p>ログイン中:<span th:text="${loginUsername}">ユーザー名</span></p>
+				<hr>
+				<a th:href="@{/home}">ホーム</a>
+				
+				<h1>ダッシュボード</h1>
+				<h1 th:text="'ようこそ、' + ${loginUsername} + 'さん'">ようこそ</h1>
+				<p>ログインユーザーの情報</p>
+				
+				<ul class="info-list">
+					<li>ユーザー名:<span th:text="${loginUsername}"></span></li>
+					<li>権限：
+						<span th:switch="${authorityId}">
+							<span th:case="'ROLE_ADMIN'"class="status-badge">管理者</span>
+							<span th:case="'ROLE_SHOP'"class="status-badge">店舗スタッフ</span>
+							<span th:case="'ROLE_WAREHOUSE'"class="status-badge">倉庫スタッフ</span>
+							<span th:case="*"class="status-badge">不明</span>
+					</span>
+					</li>
+						
+						
+					</li>
+					<li>所属先店舗ID：<span th:text="${shopId != null ? shopId :'-'}">-</span> </li>
+					<li>所属倉庫ID：<span th:text="${shopId != null ? shopId :'-'}">-</span> </li>
+				</ul>
+			</div>
+		</main>
+		
+	
+	<script>
+       const hamburger = document.getElementById("js-hamburger");
+	       hamburger.addEventListener('click',function(){
+			//bodyタグにis-openクラスを付与して、サイドバーの表示・非表示を切り替える
+			document.body.classList.toggle('is-open');
+			//ハンバーガーメニューの開閉状態を切り替えるis-openなら×ボダン開いてないなら☰ボタン
+			//containsは、クラスが存在するかどうかを確認するメソッド(~を含む)
+			//classListは、要素のクラス属性を操作するためのプロパティ(標準装備メソッド)
+			humburger.textContent = document.body.classList.contains('is-open') ? '✖' : '☰';
+		   })
+		
+	</script>
+	</body>
+</html>
