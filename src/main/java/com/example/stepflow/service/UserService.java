@@ -89,4 +89,9 @@ public class UserService {
 		}
 	}
 	
+	public List<User> findUsersByAuthority(Integer authorityId){
+		// ここで「権限IDでユーザーを検索する」という処理をします。
+		return userRepository.findByAuthorityIdAndDeleteFlag(authorityId, 0);// 0は削除されていないユーザーを意味します
+	}
+	
 }

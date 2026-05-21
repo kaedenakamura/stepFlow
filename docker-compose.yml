@@ -1,7 +1,4 @@
-version: '3.8'
-
 services:
-  # 1. データベース用のコンテナ（MySQL 8.0）
   db:
     image: mysql:8.0
     container_name: stepflow-db
@@ -11,21 +8,36 @@ services:
       MYSQL_USER: stepflow_user
       MYSQL_PASSWORD: ROOT
     ports:
-      - "3306:3306" # 🌟ローカルの3306番ポートと繋ぐ
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-pROOT"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
-  # 2. Java（Spring Boot）実行用のコンテナ
   web:
     image: eclipse-temurin:17-jdk-focal
     container_name: stepflow-app
     volumes:
       - .:/app
+      - maven_cache:/root/.m2
     working_dir: /app
     ports:
-      - "8080:8080" # 🌟おなじみの8080番ポートでWEB画面を開けるようにする
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/stepflow_db?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ROOT
     depends_on:
-      - db # 🌟DBが立ち上がってからJavaを起動する設定
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "chmod +x ./mvnw && ./mvnw -DskipTests spring-boot:run"
+    restart: unless-stopped
 
 volumes:
   mysql_data:
+  maven_cache:

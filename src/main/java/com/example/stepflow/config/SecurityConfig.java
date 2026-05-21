@@ -21,15 +21,18 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-	   http.authorizeHttpRequests(auth -> auth
+		   http.authorizeHttpRequests(auth -> auth
 			   //登録画面と、保存処理のURLを「許可」(permitAll)する
 			   .requestMatchers("/users/new","/users/new/" ).permitAll()// 「user/new」へのアクセスを誰でも許可する設定
 			   //登録画面と、保存処理のURLを「許可」(permitAll)する
 			   .requestMatchers(HttpMethod.POST,"/users").permitAll()// 「/users」へのPOSTアクセスを誰でも許可する設定
 			   
+			// 管理者専用（CustomUserDetailService .roles("ADMIN") → ROLE_ADMIN）
+			   .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+
 			// 🌟【画面遷移図の仕様】ユーザー管理機能（/users から始まるすべてのURL）は、
 			   // ログインしていて、かつ「管理者（ADMIN）」の権限を持っている人だけしか入れないように強固にガード！
-			   .requestMatchers("/users/**").hasAuthority("1")//
+			   .requestMatchers("/users/**").hasAuthority("ROLE_ADMIN")
 			   
 			   //静的リソース（CCS/JS）
 			   .requestMatchers("/css/**","/js/**").permitAll()// 「/css/**」と「/js/**」へのアクセスを誰でも許可する設定

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>店舗一覧（管理者）</title>
+	<th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+</head>
+<body>
+	<button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+	<div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+	<main class="main-content">
+		<h2>店舗一覧</h2>
+		<p th:if="${shopError}" th:text="${shopError}" style="color:#dc3545;"></p>
+		<p th:if="${#lists.isEmpty(shops)}">登録されている店舗がありません。</p>
+		<table border="1" cellpadding="8" th:unless="${#lists.isEmpty(shops)}">
+			<tr>
+				<th>店舗ID</th>
+				<th>店舗名</th>
+			</tr>
+			<tr th:each="s : ${shops}">
+				<td th:text="${s.shopId}">1</td>
+				<td th:text="${s.shopName}">店舗名</td>
+			</tr>
+		</table>
+	</main>
+	<th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

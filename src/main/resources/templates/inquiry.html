@@ -1,0 +1,128 @@
+<!DOCTYPE html> <!-- HTML5であることを宣言 -->
+<html xmlns:th="http://www.thymeleaf.org"> <!-- Thymeleaf（th:）を使う宣言 -->
+<head> <!--  head：メタ情報・CSS -->
+<meta charset="UTF-8"> <!-- 文字コードUTF-8（日本語表示） -->
+<title>お問い合わせ</title> <!-- ブラウザタブのタイトル -->
+<link rel="stylesheet" th:href="@{/css/style.css}"> <!-- 共通CSS（あれば） -->
+<style> 
+
+/* この画面専用の簡易スタイル */
+.inquiry-container { margin-left: 270px; padding: 30px; max-width: 600px; } /* サイドバー分だけ右にずらす */
+.form-group { margin-bottom: 20px; } /* フォーム項目の下余白 */
+.form-group label { display: block; margin-bottom: 8px; font-weight: bold; } /* ラベルを太字・ブロック表示 */
+.form-control { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; } /* 入力欄 */
+.btn-submit { background-color: #007bff; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; } /* 送信ボタン */
+.field-error { color: #dc3545; font-size: 13px; margin-top: 4px; } /* バリデーションエラー文字色 */
+.alert-success { background: #d4edda; color: #155724; padding: 12px; border-radius: 4px; margin-bottom: 16px; } /* 成功メッセージ（未使用でも定義） */
+/*ハンバーガーボタン*/
+   .menu-trigger {
+               position: fixed; top: 20px; left: 20px; z-index: 1000;
+               background: #2c3e50; color: #fff; border: none;
+               padding: 12px 16px; font-size: 20px; border-radius: 6px; cursor: pointer;
+               box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s ease;
+           }
+		   /* 開封時の動き */
+		     body.is-open .sidebar { left: 0; }
+		     body.is-open .menu-trigger { left: 280px; }    
+		     
+/* サイドバー共通スタイル（部品側と連動） */
+   .sidebar {
+    position: fixed; top: 0; left: -260px; width: 260px; height: 100vh;
+    background: #1e293b; color: #f8fafc; padding: 30px 20px; box-sizing: border-box;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 900;
+}
+.sidebar h2 { font-size: 24px; color: #38bdf8; margin-bottom: 25px; margin-top: 40px; border-left: 4px solid #38bdf8; padding-left: 10px; }
+.sidebar a { color: #cbd5e1; display: block; padding: 12px 0; text-decoration: none; border-bottom: 1px solid #334155; font-size: 15px; }
+.sidebar a:hover { color: #fff; background: #334155; padding-left: 5px; }
+.login-info { font-size: 13px; color: #94a3b8; }
+.role-label { font-size: 11px; margin-top: 25px; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+.role-admin { color: #f87171; }
+.role-shop { color: #fbbf24; }
+.role-warehouse { color: #38bdf8; }
+.logout-btn { background: #ef4444; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; }
+</style>
+</head>
+<body>
+	<button class="menu-trigger" id="js-hamburger">☰</button>
+	<div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+	
+
+<div class="inquiry-container">
+<h2>お問い合わせ</h2> 
+<hr> <!-- 区切り線 -->
+
+<!-- #fields は th:object があるフォームの「内側」でしか使えない。全体エラーも form 先頭へ移動 -->
+<form th:action="@{/inquiry/send}" th:object="${inquiryForm}" method="post">
+
+  <div th:if="${#fields.hasGlobalErrors()}"> <!-- bindingResult.reject(...) などの全体エラー -->
+    <p class="field-error" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+  </div>
+
+  <div class="form-group"> <!-- 送信先ブロック -->
+    <label for="receiverRole" style="color:red;">送信先</label> <!-- ラベル（必須の目印） -->
+    <select id="receiverRole" class="form-control" th:field="*{receiverRole}"> <!-- th:fieldでDTOのreceiverRoleと自動連携 -->
+      <option value="">送信先を選択してください</option> <!-- 未選択 -->
+      <option value="ROLE_ADMIN" th:unless="${authorityId == 'ROLE_ADMIN'}">管理者</option> <!-- 自分が管理者なら非表示 -->
+      <option value="ROLE_SHOP" th:unless="${authorityId == 'ROLE_SHOP'}">店舗スタッフ</option> <!-- 自分が店舗なら非表示 -->
+      <option value="ROLE_WAREHOUSE" th:unless="${authorityId == 'ROLE_WAREHOUSE'}">倉庫スタッフ</option> <!-- typo修正: WEREHOUSE→WAREHOUSE -->
+    </select>
+    <p class="field-error" th:if="${#fields.hasErrors('receiverRole')}" th:errors="*{receiverRole}"></p> <!-- 送信先のエラー表示 -->
+  </div>
+
+  <div class="form-group"> <!-- 連絡先ブロック -->
+    <label for="partnerId">連絡先（店舗/倉庫を選択時のみ必須）</label>
+    <select id="partnerId" class="form-control" th:field="*{partnerId}"> <!-- DTOのpartnerIdと連携 -->
+      <option value="">--連携先を選択してください--</option> <!-- 未選択 -->
+      <option th:each="partner : ${partnerList}" th:value="${partner.id}" th:text="${partner.name}"></option> <!-- Controllerから渡した候補 -->
+    </select>
+    <p class="field-error" th:if="${#fields.hasErrors('partnerId')}" th:errors="*{partnerId}"></p> <!-- 連絡先エラー -->
+  </div>
+
+  <div class="form-group"> <!-- 本文ブロック -->
+    <label for="content" style="color:red;">お問い合わせ内容</label>
+    <textarea id="content" class="form-control" rows="6" maxlength="255" placeholder="お問い合わせ内容を入力してください（255文字以内）" th:field="*{content}"></textarea> <!-- DTOのcontent -->
+    <p class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></p> <!-- 本文エラー -->
+  </div>
+
+  <button type="submit" class="btn-submit">送信する</button> <!-- 送信ボタン（POST発火） -->
+</form>
+</div>
+
+<script> <!-- 送信先に応じて連絡先プルダウンを有効/無効にする -->
+document.addEventListener("DOMContentLoaded", function () { // HTML読み込み完了後に実行
+  const receiverRoleSelect = document.getElementById("receiverRole"); // 送信先セレクトを取得
+  const partnerIdSelect = document.getElementById("partnerId"); // 連絡先セレクトを取得
+
+  function updatePartnerRequired() { // 有効/無効を切り替える関数
+    const selectedRole = receiverRoleSelect.value; // 現在選ばれている送信先
+    if (selectedRole === "ROLE_SHOP" || selectedRole === "ROLE_WAREHOUSE") { // 店舗 or 倉庫宛
+      partnerIdSelect.disabled = false; // 連絡先を選べるようにする
+      partnerIdSelect.required = true; // HTML5の必須チェックもON
+    } else { // 管理者宛など
+      partnerIdSelect.disabled = true; // 選べないようにする
+      partnerIdSelect.required = false; // 必須を解除
+      partnerIdSelect.value = ""; // 値をクリア
+    }
+  }
+
+  receiverRoleSelect.addEventListener("change", updatePartnerRequired); // 送信先変更時に実行
+  updatePartnerRequired(); // 初回表示時（戻り画面）にも状態を合わせる
+});
+</script>
+
+
+<script>
+   const hamburger = document.getElementById("js-hamburger");
+       hamburger.addEventListener('click',function(){
+		//bodyタグにis-openクラスを付与して、サイドバーの表示・非表示を切り替える
+		document.body.classList.toggle('is-open');
+		//ハンバーガーメニューの開閉状態を切り替えるis-openなら×ボダン開いてないなら☰ボタン
+		//containsは、クラスが存在するかどうかを確認するメソッド(~を含む)
+		//classListは、要素のクラス属性を操作するためのプロパティ(標準装備メソッド)
+		hamburger.textContent = document.body.classList.contains('is-open') ? '✖' : '☰';
+	   })
+</script>
+
+
+</body>
+</html>

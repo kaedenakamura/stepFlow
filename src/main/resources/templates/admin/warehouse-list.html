@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>倉庫一覧（管理者）</title>
+	<th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+</head>
+<body>
+	<button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+	<div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+	<main class="main-content">
+		<h2>倉庫一覧</h2>
+		<p th:if="${#lists.isEmpty(warehouses)}">登録されている倉庫がありません。</p>
+		<table border="1" cellpadding="8" th:unless="${#lists.isEmpty(warehouses)}">
+			<tr>
+				<th>倉庫ID</th>
+				<th>倉庫名</th>
+			</tr>
+			<tr th:each="warehouse : ${warehouses}">
+				<td th:text="${warehouse.warehouseId}">1</td>
+				<td th:text="${warehouse.warehouseName}">倉庫名</td>
+			</tr>
+		</table>
+	</main>
+	<th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

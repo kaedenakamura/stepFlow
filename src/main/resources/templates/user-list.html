@@ -1,62 +1,70 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-	<head>
-        <meta charset="UTF-8" />
-        <title>ユーザー一覧 - 管理システム</title>
-		<style>
-            .user-list {
-                border-collapse: collapse; width: 50%; margin: 20px 0 auto;
-				margin: 20px auto;
-            }
-            .user-list th, .user-list td {
-                border: 1px solid #ccc;
-                padding: 10px;
-				text-align: center;
-            }
-            .user-list th {
-                background-color: rgb(242, 242, 242); color: rgb(0, 0, 0);
-            }
-			.user-list tr:nth-child(even) {
-                background-color: #f9f9f9;
-            }
-		</style>
-	</head>
-	<body>
-        <h1 style="text-align: center;">ユーザー一覧(管理者用)</h1>
-		<div style="margin-bottom: 20px; text-align: center;">
-		    <a th:href="@{/users/new}" class="btn btn-success">＋ 新規ユーザー登録</a>
+<head>
+	<meta charset="UTF-8" />
+	<title>ユーザー一覧 - 管理システム</title>
+	<th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+	<style>
+		.user-list {
+			border-collapse: collapse;
+			width: 90%;
+			max-width: 900px;
+			margin: 20px auto;
+		}
+		.user-list th, .user-list td {
+			border: 1px solid #ccc;
+			padding: 10px;
+			text-align: center;
+		}
+		.user-list th {
+			background-color: #f2f2f2;
+		}
+		.user-list tr:nth-child(even) {
+			background-color: #f9f9f9;
+		}
+		.page-actions {
+			margin-bottom: 20px;
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+	<button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+	<div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+	<main class="main-content">
+		<h1 style="text-align: center;">ユーザー一覧（管理者用）</h1>
+		<div class="page-actions">
+			<a th:href="@{/users/new}">＋ 新規ユーザー登録</a>
 		</div>
-        <table class="user-list">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>名前</th>
+		<table class="user-list">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>名前</th>
 					<th>性別</th>
-                    <th>権限</th>
+					<th>権限</th>
 					<th>所属</th>
 					<th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="user : ${users}">
-                    <td th:text="${user.userId}">ID</td>
-                    <td th:text="${user.userName}">名前</td>
-                    <td th:text="${user.userGender == 1 ? '男' : (user.userGender == 2 ? '女' : 'その他')}">性別</td>
-					<td th:text="${user.authorityId } == 1 ? '管理者' : (user.authorityId == 2 ? '店舗スタッフ' : '倉庫スタッフ')" >権限</td>
-					<td th:text="${user.shopId != null && user.shopId != ''  ?
-					 user.shopId :(user.warehouseId != null && user.warehouseId != '' ? user.warehouseId : '未所属')}">所属</td>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="user : ${users}">
+					<td th:text="${user.userId}">ID</td>
+					<td th:text="${user.userName}">名前</td>
+					<td th:text="${user.userGender == 1 ? '男' : (user.userGender == 2 ? '女' : 'その他')}">性別</td>
+					<td th:text="${user.authorityId == 1 ? '管理者' : (user.authorityId == 2 ? '店舗スタッフ' : '倉庫スタッフ')}">権限</td>
+					<td th:text="${user.shopId != null && user.shopId != '' ? user.shopId : (user.warehouseId != null && user.warehouseId != '' ? user.warehouseId : '未所属')}">所属</td>
 					<td>
-						<a th:href="@{/users/edit/{id}(id=${user.userId})}" class="btn btn-primary">編集</a>
-						
-						<form th:action="@{/users/delete/{id}(id=${user.userId})}" method="post" style="display: inline;">
-                            <input type="hidden" name="_method" value="delete" />
-                            <button type="submit" class="btn btn-danger" onclick="return confirm('本当に削除しますか？')">削除</button>
+						<a th:href="@{/users/edit/{id}(id=${user.userId})}">編集</a>
+						<form th:action="@{/users/delete/{id}(id=${user.userId})}" method="post" style="display:inline;">
+							<input type="hidden" name="_method" value="delete" />
+							<button type="submit" onclick="return confirm('本当に削除しますか？')">削除</button>
 						</form>
 					</td>
-				 </tr>
-            </tbody>
- 	   </table>
-	  </body>
+				</tr>
+			</tbody>
+		</table>
+	</main>
+	<th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
 </html>
-
-

@@ -1,14 +1,18 @@
 <!DOCTYPE html>
-<html xmlns="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8" />
 	<title>ユーザー新規登録-管理システム</title>
-</head>
-<style>
-        .form-group { margin-bottom: 15px; }
-        label { display: inline-block; width: 100px; }
-    </style>
+	<th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+	<style>
+		.form-group { margin-bottom: 15px; }
+		label { display: inline-block; width: 100px; }
+	</style>
+	</head>
 <body>
+	<button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+	<div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+	<main class="main-content">
 	<h1 style="text-align: center;" th:text="${user.userId == null} ?  'ユーザー新規登録（管理者用）' : 'ユーザー編集(管理者用)'" >
 		</h1>
 	<div th:if="${successMessage}" style="color: green; text-align: center; margin-bottom: 20px;">
@@ -68,10 +72,9 @@
         
 		<button type="submit" style="display: block; margin: 20px auto;">登録</button>
     </form>
-	
 	<hr>
 	<a th:href="@{/users}" style="display: block; text-align: center;">ユーザー一覧に戻る</a>
-	
+	</main>
 	<script>
 		document.addEventListener('DOMContentLoaded', function(){
 			const roleSelect = document.getElementById('authorityId');//権限の選択フィールド
@@ -99,6 +102,7 @@
 			toggleAffiliation();//初期状態を設定
 		});
 		</script>
-			
+		
+	<th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
 </body>
 </html>

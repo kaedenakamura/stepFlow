@@ -10,9 +10,9 @@
 	</parent>
 
 	<groupId>com.example</groupId>
-	<artifactId>stepfrow</artifactId>
+	<artifactId>stepflow</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>stepfrow</name>
+	<name>stepflow</name>
 	<description>Step Frow Project</description>
 
 	<properties>
@@ -39,6 +39,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+			<version>1.18.36</version>
 			<optional>true</optional>
 		</dependency>
 
@@ -60,6 +61,12 @@
 		<dependency>
     		<groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
 		</dependency>
 		
 		

@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.example.stepflow.entity.User;
 import com.example.stepflow.service.UserService;
@@ -21,7 +24,10 @@ public class UserController {
     private UserService userService;
     // ここに「ユーザーに関する画面の処理」を書いていきます。
     @GetMapping("/users")
-    public String listUsers(Model model) {
+    public String listUsers(
+		@AuthenticationPrincipal UserDetails userDetails,
+		Model model) {
+			addSidebarAttributes(userDetails, model);//サイドバー用（homeControllor.java）に追加したコードをここにも追加する
     	// ここで「ユーザー全員の情報をデータベースから取ってきて、画面に渡す」という処理をします。
         var users = userService.getAllUsers();
         // ここで「ユーザー全員の情報をデータベースから取ってきて、画面に渡す」という処理をします。
@@ -33,7 +39,7 @@ public class UserController {
 	   
     // @PostMapping は、HTMLの formタグの method="post" と対応します
     @PostMapping("/users")
-    public String saveUser(@Validated @ModelAttribute("user") User user ,BindingResult result , RedirectAttributes redirectAttributes) {
+    public String saveUser(@Validated @ModelAttribute("user") User user ,BindingResult result ,@AuthenticationPrincipal UserDetails userDetails,Model model, RedirectAttributes redirectAttributes) {
     	// @Validated は「このUserオブジェクトの中身を、Userクラスで定義したバリデーションルールに従ってチェックしてください」という命令です。
     	// BindingResultは、バリデーションの結果を受け取るため
     	
@@ -49,7 +55,7 @@ public class UserController {
     	//主導のバリデーションチェック（パスワード英数字チェック）
     	if(user.getUserPassword() != null && !user.getUserPassword().matches("[a-zA-Z0-9]+$")) {
     		// ここで「パスワードが英数字でない場合のエラー処理」をします。
-    		result.rejectValue("password","error.password","英数字で入力してください");
+    		result.rejectValue("userpassword","error.userpassword","英数字で入力してください");
     	}
     	
     	//ルール：店舗スタッフはSHOP、倉庫スタッフはWAREHOUSE、の場合は、入力必須だが、空の場合のエラー処理
@@ -66,6 +72,7 @@ public class UserController {
 			}
     	if (result.hasErrors()) {
     		// バリデーションエラーがある場合は、ユーザー新規登録の画面に戻す
+			addSidebarAttributes(userDetails, model);
 			return "user-form";
 		}
     	try {
@@ -78,7 +85,9 @@ public class UserController {
 		  return "redirect:/users/new";//ユーザー新規登録の画面にリダイレクトして、成功メッセージを表示するための処理
 		} catch (Exception e) {
 			// ここで「ユーザーの情報をデータベースに保存する際のエラー処理」をします。
-			// 例えば、ユーザー名が重複している場合などのエラーをキャッチして、エラーメッセージを追加することができます。
+			// 例えば、ユーザー名が重複している場合などのエラーを
+			//キャッチして、エラーメッセージを追加することができます。
+			addSidebarAttributes(userDetails,model);//サイドバー用（homeControllor.java）に追加したコードをここにも追加する
 			result.rejectValue("userName", "error.userName","登録に失敗しました。入力内容を確認してください");
 			return "user-form"; // ユーザー新規登録の画面に戻す
 		}
@@ -89,11 +98,12 @@ public class UserController {
     
     @GetMapping("/users/edit/{id}")
     //pathVariableはURLの一部を変数として受け取るためのアノテーションで、{id}の部分が変数になります。
-    public String showEditUserForm(@PathVariable Integer id, Model model) {
+    public String showEditUserForm(@PathVariable Integer id, @AuthenticationPrincipal UserDetails userDetails, Model model) {
+		addSidebarAttributes(userDetails, model);//サイドバー用（homeControllor.java）に追加したコードをここにも追加する
 		// ここで「ユーザーの情報をデータベースから取ってきて、ユーザー編集の画面に渡す」という処理をします。
     	// IDを元にDBから既存のユーザー情報を取ってくる
+			//ログイン中のユーザー名を取得して画面に渡す
 		User user = userService.getUserById(id);
-		
 		if(user == null) {
 			// ユーザーが存在しない、または削除されている場合は、ユーザー一覧画面にリダイレクトするなどの処理をします。
 			return "redirect:/users";//ユーザー一覧画面にリダイレクト
@@ -113,7 +123,8 @@ public class UserController {
     
     
     @GetMapping("/users/new")
-    public String showCreateUserForm(Model model) {
+    public String showCreateUserForm(@AuthenticationPrincipal UserDetails userDetails,Model model) {
+		addSidebarAttributes(userDetails, model);//サイドバー用（homeControllor.java）に追加したコードをここにも追加する
 		// ここで「ユーザー新規登録の画面を表示する」という処理をします。
 		// 例えば、空のUserオブジェクトを作って、それをモデルに入れて、フォームで使えるようにするなどの処理です。
 		// model.addAttribute("user", new User());
@@ -137,8 +148,16 @@ public class UserController {
     	
     return "user-form";
     }
-  
+	/**サイドバー用（homeControllor.java）に追加したコードをここにも追加する */
+	private void addSidebarAttributes(UserDetails userDetails, Model model){
+		model.addAttribute("loginUsername", userDetails.getUsername());
+		String authorityId = userDetails.getAuthorities().stream()
+				.map(GrantedAuthority::getAuthority)
+				.findFirst()
+				.orElse("");
+		model.addAttribute("authorityId", authorityId);
+	}
    
-    
-    
 }
+    
+    
