@@ -32,7 +32,9 @@ build/
 ### VS Code ###
 .vscode/
 
-.document/
+# 設計図・仕様書など（ローカルのみ）
+document/
+
 .metadata/
 
 # Demo batch ON flag (local only)
