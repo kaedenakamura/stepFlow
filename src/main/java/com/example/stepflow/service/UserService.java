@@ -33,30 +33,21 @@ public class UserService {
 		
 	
 	public void saveUser(User user) {
-		//ユーザーのパスワードを暗号化して保存する処理を追加
-		// passwordEncoder.encode() という既存のメソッドを呼び出す
-		String encodedPassword = passwordEncoder.encode(user.getUserPassword());
-		// ユーザーのパスワードを暗号化して保存する処理を追加
-		user.setUserPassword(encodedPassword);
-		
-		System.out.println("ユーザーのパスワードを暗号化して保存します。"+ encodedPassword);//パスワードを暗号化して保存する処理を追加
-		// ここで「ユーザーの情報をデータベースに保存する」という処理をします。
-		userRepository.save(user);
-			//save()は、JPAの標準機能で、IDがあれば UPDATE(編集)、なければ INSERT(新規登録) になるというイメージです。
-			// JPAの内部イメージ（あくまで概念です）
-		/*	public User save(User entity) {
-			    if (entity.getId() == null) {
-			        // IDが空なら「新しい人」としてDBに新規登録命令を出す
-			        entityManager.persist(entity); // これが INSERT になる
-			    } else {
-			        // IDが入っていれば「既存の人」としてDBに上書き命令を出す
-			        entityManager.merge(entity);   // これが UPDATE になる
-			    }
-			    return entity;
+		if (user.getUserId() == null) {
+			user.setUserPassword(passwordEncoder.encode(user.getUserPassword()));
+		} else {
+			User existing = userRepository.findById(user.getUserId()).orElse(null);
+			if (existing == null) {
+				throw new IllegalArgumentException("更新対象のユーザーが見つかりません");
 			}
-			*/
-			// つまり、userRepository.save(user) は、IDがあれば UPDATE、なければ INSERT になるというイメージです。
-			
+			String rawPassword = user.getUserPassword();
+			if (rawPassword == null || rawPassword.isBlank()) {
+				user.setUserPassword(existing.getUserPassword());
+			} else {
+				user.setUserPassword(passwordEncoder.encode(rawPassword));
+			}
+		}
+		userRepository.save(user);
 	}
 	/**
      * 全ユーザーを取得する

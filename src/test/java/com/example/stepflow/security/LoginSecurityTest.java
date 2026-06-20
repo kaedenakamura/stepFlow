@@ -198,6 +198,10 @@ class LoginSecurityTest {
 
 		mockMvc.perform(get("/inquiry")) // GET /inquiry（未ログイン問い合わせも permitAll）
 				.andExpect(status().isOk()); // 200 OK で表示できる
+
+		mockMvc.perform(get("/inquiry/form")) // 旧URL（ログイン画面のリンク等）→ /inquiry へ
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrl("/inquiry"));
 	}
 
 	// ─────────────────────────────────────────

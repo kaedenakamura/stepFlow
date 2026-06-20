@@ -30,8 +30,9 @@
             <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <div class="form-group">
                 <label for="quantity">在庫数:</label>
-                <input type="number" id="quantity" name="quantity" class="qty-input" min="0" required
-                       th:value="${stock.warehouseStock}"/>
+                <input type="number" id="quantity" name="quantity" class="qty-input" min="0"
+                       th:value="${inputQuantity != null ? inputQuantity : stock.warehouseStock}"/>
+                <p th:if="${quantityError}" style="color: #dc3545;" th:text="${quantityError}"></p>
             </div>
             <button type="submit" class="btn-save">保存</button>
         </form>

@@ -35,7 +35,7 @@ import com.example.stepflow.repository.ShopRepository;
 import com.example.stepflow.repository.WarehouseRepository;
 
 // ─────────────────────────────────────────
-// SecurityConfig：/users/** は ROLE_ADMIN 必須（/users/new と POST /users のみ例外）
+// SecurityConfig：/users と /users/** はすべて ROLE_ADMIN 必須
 // ─────────────────────────────────────────
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -113,6 +113,7 @@ class UserControllerTest {
 		mockMvc.perform(get("/users"))
 				.andExpect(status().isOk())
 				.andExpect(view().name("user-list"))
+				.andExpect(model().attribute("authorityId", "ROLE_ADMIN"))
 				.andExpect(model().attributeExists("users"));
 	}
 
@@ -127,7 +128,8 @@ class UserControllerTest {
 		mockMvc.perform(get("/users").param("authorityId", "2"))
 				.andExpect(status().isOk())
 				.andExpect(view().name("user-list"))
-				.andExpect(model().attribute("authorityId", 2))
+				.andExpect(model().attribute("selectedAuthorityId", 2))
+				.andExpect(model().attribute("authorityId", "ROLE_ADMIN"))
 				.andExpect(model().attributeExists("users"));
 	}
 
@@ -166,6 +168,33 @@ class UserControllerTest {
 	// ─────────────────────────────────────────
 	@Test
 	@WithMockUser(username = "shop_user_test", roles = "SHOP")
+	@DisplayName("店舗ユーザーはユーザー新規登録画面にアクセスできない")
+	void shopUserCannotViewNewUserForm() throws Exception {
+
+		mockMvc.perform(get("/users/new"))
+				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@DisplayName("未ログインではユーザー新規登録画面に入れずログインへ")
+	void unauthenticatedCannotViewNewUserForm() throws Exception {
+
+		mockMvc.perform(get("/users/new"))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrlPattern("**/login"));
+	}
+
+	@Test
+	@WithMockUser(username = "warehouse_user_test", roles = "WAREHOUSE")
+	@DisplayName("倉庫ユーザーはユーザー一覧画面にアクセスできない")
+	void warehouseUserCannotViewUserList() throws Exception {
+
+		mockMvc.perform(get("/users"))
+				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(username = "shop_user_test", roles = "SHOP")
 	@DisplayName("店舗ユーザーはユーザー一覧画面にアクセスできない")
 	void shopUserCannotViewUserList() throws Exception {
 
@@ -180,6 +209,49 @@ class UserControllerTest {
 		mockMvc.perform(get("/users"))
 				.andExpect(status().is3xxRedirection())
 				.andExpect(redirectedUrlPattern("**/login"));
+	}
+
+	@Test
+	@WithMockUser(username = "admin_user_test", roles = "ADMIN")
+	@DisplayName("パスワード未入力の新規登録はエラーメッセージを表示する")
+	void blankPasswordShowsValidationError() throws Exception {
+
+		mockMvc.perform(post("/users").with(csrf())
+				.param("userName", "new_user_test")
+				.param("userGender", "1")
+				.param("authorityId", "1")
+				.param("userPassword", ""))
+				.andExpect(status().isOk())
+				.andExpect(view().name("user-form"))
+				.andExpect(model().attributeHasFieldErrors("user", "userPassword"));
+	}
+
+	@Test
+	@WithMockUser(username = "admin_user_test", roles = "ADMIN")
+	@DisplayName("必須項目未入力の新規登録はフォームに戻る")
+	void missingRequiredFieldsReturnForm() throws Exception {
+
+		mockMvc.perform(post("/users").with(csrf())
+				.param("userName", "")
+				.param("userPassword", ""))
+				.andExpect(status().isOk())
+				.andExpect(view().name("user-form"))
+				.andExpect(model().attributeHasFieldErrors("user", "userName"));
+	}
+
+	@Test
+	@WithMockUser(username = "admin_user_test", roles = "ADMIN")
+	@DisplayName("店舗スタッフ登録時に店舗未選択はエラーになる")
+	void shopStaffRequiresShopSelection() throws Exception {
+
+		mockMvc.perform(post("/users").with(csrf())
+				.param("userName", "shop_new_test")
+				.param("userGender", "1")
+				.param("authorityId", "2")
+				.param("userPassword", "password1"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("user-form"))
+				.andExpect(model().attributeHasFieldErrors("user", "shopId"));
 	}
 
 	@Test

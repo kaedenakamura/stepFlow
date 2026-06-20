@@ -39,3 +39,6 @@ document/
 
 # Demo batch ON flag (local only)
 scripts/demo-batch.ON
+
+# Production secrets (use .env.prod.example as template)
+.env.prod

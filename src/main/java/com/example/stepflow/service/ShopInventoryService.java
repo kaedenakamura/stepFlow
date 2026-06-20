@@ -84,8 +84,8 @@ public class ShopInventoryService {
          //在庫数量を更新
          row.setShopStock(quantity);
          //更新した行を保存
-         shopStockRepository.save(row);
-         return true;
+        shopStockRepository.save(row);
+        return true;
     }
 
     /** 編集画面用：自店舗の1行だけ取得（他店舗・削除済みは null） */

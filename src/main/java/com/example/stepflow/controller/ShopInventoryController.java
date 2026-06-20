@@ -91,14 +91,21 @@ public class ShopInventoryController {
     @PostMapping("/edit/{shopStockId}")
     public String updateQuantity(
             @PathVariable("shopStockId") Integer shopStockId,
-            @RequestParam("quantity") Integer quantity,
+            @RequestParam(name = "quantity", required = false) String quantityText,
             @AuthenticationPrincipal UserDetails userDetails,
+            Model model,
             RedirectAttributes redirectAttributes) {
 
         User loginUser = userService.findUserByName(userDetails.getUsername());
         if (loginUser == null || loginUser.getShopId() == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "所属店舗が設定されていません。");
             return "redirect:/shop/inventory";
+        }
+
+        Integer quantity = parseQuantity(quantityText, model);
+        if (quantity == null) {
+            return renderEditFormOnError(loginUser.getShopId(), shopStockId, quantityText, userDetails, model,
+                    redirectAttributes);
         }
 
         boolean ok = shopInventoryService.updateStockQuantity(
@@ -110,6 +117,43 @@ public class ShopInventoryController {
                     "在庫を更新できませんでした。数量を確認してください。");
         }
         return "redirect:/shop/inventory";
+    }
+
+    /** 空欄・非数値・負数を Controller で検証（HTML required に依存しない） */
+    private Integer parseQuantity(String quantityText, Model model) {
+        if (quantityText == null || quantityText.isBlank()) {
+            model.addAttribute("quantityError", "在庫数を入力してください");
+            return null;
+        }
+        try {
+            int value = Integer.parseInt(quantityText.strip());
+            if (value < 0) {
+                model.addAttribute("quantityError", "在庫数は0以上で入力してください");
+                return null;
+            }
+            return value;
+        } catch (NumberFormatException ex) {
+            model.addAttribute("quantityError", "在庫数は数値で入力してください");
+            return null;
+        }
+    }
+
+    private String renderEditFormOnError(
+            Integer shopId,
+            Integer shopStockId,
+            String quantityText,
+            UserDetails userDetails,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        ShopStock stock = shopInventoryService.findEditableStock(shopId, shopStockId);
+        if (stock == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "在庫が見つかりませんでした。");
+            return "redirect:/shop/inventory";
+        }
+        addSidebarModel(userDetails, model);
+        model.addAttribute("stock", stock);
+        model.addAttribute("inputQuantity", quantityText);
+        return "shop/inventory-edit";
     }
 
     private void addSidebarModel(UserDetails userDetails, Model model) {

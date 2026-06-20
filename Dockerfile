@@ -1,11 +1,24 @@
-# 1. ベースとなるOSとJavaの環境（既製品）を用意する
-#FROM openjdk:17-jdk-slim
+# 本番用: Maven で JAR をビルドし、JREのみで実行
+FROM eclipse-temurin:17-jdk-jammy AS build
 
-# 2. パソコン（コンテナ）の中に、アプリを配置するフォルダを作る
-#WORKDIR /app
+WORKDIR /app
 
-# 3. 楓さんがEclipseでビルドしたJavaの実行ファイル（.jar）を、コンテナの中にコピーする
-#COPY target/stepflow-0.0.1-SNAPSHOT.jar app.jar
+COPY mvnw mvnw.cmd pom.xml ./
+COPY .mvn .mvn
+RUN chmod +x mvnw
 
-# 4. このパソコンが起動した瞬間に、Javaアプリを動かすコマンドを実行する
-#ENTRYPOINT ["java", "-jar", "app.jar"]
+COPY src src
+RUN ./mvnw clean package -DskipTests -B
+
+FROM eclipse-temurin:17-jre-jammy
+
+WORKDIR /app
+
+RUN groupadd --system stepflow && useradd --system --gid stepflow stepflow
+USER stepflow
+
+COPY --from=build /app/target/stepflow-0.0.1-SNAPSHOT.jar app.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

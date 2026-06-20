@@ -131,6 +131,19 @@ class WarehouseInventoryControllerTest {
 	}
 
 	@Test
+	@WithMockUser(username = "warehouse_inventory_test", roles = "WAREHOUSE")
+	@DisplayName("在庫数未入力は編集画面にエラーを表示する")
+	void blankQuantityShowsValidationError() throws Exception {
+
+		mockMvc.perform(post("/warehouse/inventory/edit/" + testWarehouseStockId)
+						.with(csrf())
+						.param("quantity", ""))
+				.andExpect(status().isOk())
+				.andExpect(view().name("warehouse/inventory-edit"))
+				.andExpect(model().attribute("quantityError", "在庫数を入力してください"));
+	}
+
+	@Test
 	@WithMockUser(roles = "SHOP")
 	@DisplayName("店舗ユーザーは倉庫在庫画面にアクセスできない")
 	void shopUserCannotViewWarehouseInventory() throws Exception {

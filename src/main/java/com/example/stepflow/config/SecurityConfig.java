@@ -25,25 +25,15 @@ public class SecurityConfig {
 
 			// 「/login」へのアクセスを誰でも許可する設定
 		       .requestMatchers("/login","/login/").permitAll()
-			   // 「/login」へのアクセスを誰でも許可する設定
-			   //登録画面と、保存処理のURLを「許可」(permitAll)する
-			   .requestMatchers("/users/new","/users/new/" ).permitAll()
-			   // 「user/new」へのアクセスを誰でも許可する設定
-			   //登録画面と、保存処理のURLを「許可」(permitAll)する
-			   .requestMatchers(HttpMethod.POST,"/users").permitAll()
-			   // 「/users」へのGETアクセスを誰でも許可する設定
-			   .requestMatchers(HttpMethod.GET,"/inquiry","/inquiry/").permitAll()
-			   // 「/inquiry」へのPOSTアクセスを誰でも許可する設定
+			   // ゲスト問い合わせ（未ログイン可）
+			   .requestMatchers(HttpMethod.GET, "/inquiry", "/inquiry/", "/inquiry/form").permitAll()
 			   .requestMatchers(HttpMethod.POST,"/inquiry/send").permitAll()
 
-
-			   
 			// 管理者専用（CustomUserDetailService .roles("ADMIN") → ROLE_ADMIN）
 			   .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
 
-			// 🌟【画面遷移図の仕様】ユーザー管理機能（/users から始まるすべてのURL）は、
-			   // ログインしていて、かつ「管理者（ADMIN）」の権限を持っている人だけしか入れないように強固にガード！
-			   .requestMatchers("/users/**").hasAuthority("ROLE_ADMIN")
+			// ユーザー管理（一覧・新規・編集・保存・削除）は管理者のみ
+			   .requestMatchers("/users", "/users/**").hasAuthority("ROLE_ADMIN")
 			   
 			   .requestMatchers("/shop/**").hasAuthority("ROLE_SHOP")
 			   // 「/shop/**」へのアクセスを「店舗スタッフ（ROLE_SHOP）」のみ許可する設定

@@ -234,7 +234,22 @@ class WarehouseOrderControllerTest {
 				.param("filterFrom", "2026-01-01") // ⑤ 日付パラメータ（LocalDate 変換用）
 				.param("filterTo", "2026-12-31")) // ⑥ 日付パラメータ
 				.andExpect(status().is3xxRedirection()) // ⑦ リダイレクト
-				.andExpect(redirectedUrl("/warehouse/stock?status=準備中&from=2026-01-01&to=2026-12-31")); // ⑧ 絞り込み条件付き URL
+				.andExpect(redirectedUrl("/warehouse/stock?status=%E6%BA%96%E5%82%99%E4%B8%AD&from=2026-01-01&to=2026-12-31"));
+	}
+
+	@Test
+	@WithMockUser(username = "warehouse_order_test", roles = "WAREHOUSE")
+	@DisplayName("絞り込み未使用時でも受注ステータスを更新できる")
+	void warehouseUserCanUpdateOrderStatusWithoutFilters() throws Exception {
+
+		mockMvc.perform(post("/warehouse/stock/{id}/status", testOrderId)
+				.with(csrf())
+				.param("orderStatus", "発注済")
+				.param("filterStatus", "")
+				.param("filterFrom", "")
+				.param("filterTo", ""))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(redirectedUrl("/warehouse/stock"));
 	}
 
 	// ─────────────────────────────────────────

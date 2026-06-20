@@ -26,14 +26,15 @@ import org.springframework.http.HttpHeaders;          // HTTPレスポンスヘ�
 import org.springframework.http.HttpStatus;           // 400/500 など
 import org.springframework.http.MediaType;            // CSV/PDF の Content-Type
 import org.springframework.http.ResponseEntity;       // バイナリ返却用
-import java.nio.charset.StandardCharsets;             // UTF-8 エンコード
+import java.time.LocalDate;//日付型
+import java.nio.charset.StandardCharsets;
 import com.example.stepflow.service.ShopSalesPdfService; // PDF生成（流用）
 import java.io.IOException;                           // PDF生成失敗時
 import org.slf4j.Logger;                              // エラーログ
 import org.slf4j.LoggerFactory;
 
 
-import java.time.LocalDate;//日付型
+import org.springframework.web.util.UriComponentsBuilder;
 
 
 @Controller
@@ -202,9 +203,9 @@ public class WarehouseOrderController {
     public String updateStatus(
             @PathVariable("shopOrderId") Integer shopOrderId,
             @RequestParam("orderStatus") String orderStatus,
-            @RequestParam("filterStatus") String filterStatus,
-            @RequestParam("filterFrom") LocalDate filterFrom,
-            @RequestParam("filterTo") LocalDate filterTo,
+            @RequestParam(name = "filterStatus", required = false) String filterStatus,
+            @RequestParam(name = "filterFrom", required = false) String filterFrom,
+            @RequestParam(name = "filterTo", required = false) String filterTo,
             @AuthenticationPrincipal UserDetails userDetails,
             RedirectAttributes redirectAttributes) {
 
@@ -226,30 +227,32 @@ public class WarehouseOrderController {
             redirectAttributes.addFlashAttribute("errorMessage", "ステータスの更新に失敗しました。");
         }
 
-        //絞り込み条件を渡して受注一覧を取得
-        StringBuilder redirect = new StringBuilder("redirect:/warehouse/stock");
-        //url→redirect:/warehouse/stock→この先をappendで追加　
-        // 例：redirect:/warehouse/stock?status=準備中&from=2026-01-01&to=2026-01-31
-        //絞り込み条件を追加
-        boolean first = true;
-        if(filterStatus != null && !filterStatus.isEmpty()){
-            //絞り込み条件がある場合はクエリパラメータを追加
-            redirect.append(first ? "?" : "&").append("status=").append(filterStatus);
-            first = false;
-            //firstがtrueの場合は?を追加、falseの場合は&を追加 最初のみ?を追加以降は&を追加
-        }
-        if(filterFrom != null){
-            redirect.append(first ? "?" : "&").append("from=").append(filterFrom);
-            first = false;
-        }
-        if(filterTo != null){
-            redirect.append(first ? "?" : "&").append("to=").append(filterTo);
-            first = false;
-        }
-
-        return redirect.toString();//toString()はStringBuilderをStringに変換するメソッド
-        //例：redirect:/warehouse/stock?status=準備中&from=2026-01-01&to=2026-01-31
+        return buildStockListRedirect(filterStatus, parseFilterDate(filterFrom), parseFilterDate(filterTo));
     }
+
+    /** 絞り込み条件付きで一覧へ戻る（日本語ステータスも URL エンコード） */
+    private String buildStockListRedirect(String status, LocalDate from, LocalDate to) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/warehouse/stock");
+        if (status != null && !status.isBlank()) {
+            builder.queryParam("status", status);
+        }
+        if (from != null) {
+            builder.queryParam("from", from);
+        }
+        if (to != null) {
+            builder.queryParam("to", to);
+        }
+        return "redirect:" + builder.build().encode(StandardCharsets.UTF_8).toUriString();
+    }
+
+    /** hidden の空文字を LocalDate に変換しない（空は null） */
+    private LocalDate parseFilterDate(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return LocalDate.parse(value);
+    }
+
     /** サイドバーの属性を追加 */
     private void addSidebarAttributes(UserDetails userDetails, Model model) {
         model.addAttribute("loginUsername", userDetails.getUsername());

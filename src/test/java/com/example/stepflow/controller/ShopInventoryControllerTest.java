@@ -173,6 +173,32 @@ class ShopInventoryControllerTest {
 				.andExpect(redirectedUrl("/shop/inventory"));
 	}
 
+	@Test
+	@WithMockUser(username = "shop_inventory_test", roles = "SHOP")
+	@DisplayName("在庫数未入力は編集画面にエラーを表示する")
+	void blankQuantityShowsValidationError() throws Exception {
+
+		mockMvc.perform(post("/shop/inventory/edit/" + testShopStockId)
+						.with(csrf())
+						.param("quantity", ""))
+				.andExpect(status().isOk())
+				.andExpect(view().name("shop/inventory-edit"))
+				.andExpect(model().attribute("quantityError", "在庫数を入力してください"));
+	}
+
+	@Test
+	@WithMockUser(username = "shop_inventory_test", roles = "SHOP")
+	@DisplayName("在庫数が数値でない場合は編集画面にエラーを表示する")
+	void invalidQuantityShowsValidationError() throws Exception {
+
+		mockMvc.perform(post("/shop/inventory/edit/" + testShopStockId)
+						.with(csrf())
+						.param("quantity", "abc"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("shop/inventory-edit"))
+				.andExpect(model().attribute("quantityError", "在庫数は数値で入力してください"));
+	}
+
 	// ─────────────────────────────────────────
 	// TC：権限（管理者は店舗画面に入れない）
 	// ─────────────────────────────────────────

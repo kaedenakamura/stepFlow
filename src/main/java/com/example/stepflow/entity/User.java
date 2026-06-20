@@ -8,7 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 
 // ↓これは「コードを楽に書くためのツール（Lombok）」を借りる宣言です
 import lombok.Data;
@@ -25,16 +25,15 @@ public class User {
 
     
     @Column(name = "user_name" ,nullable = false, unique = true , length = 255 ) //名前は一意（unique）かつ255文字以内で、空（null）を許さない（nullable = false）という指定
+    @NotBlank(message = "名前を入力してください")
     private String userName;// 名前を入れる箱　DBの列名と同じなら@Columnは省略できる為name=nameは省略")
     
     @Column(name="user_password", nullable = false)
-    @Size(min = 8 , max = 255 , message = "パスワードは8文字以上２５５文字いないで入力してください　") // パスワードは8文字以上255文字以下であるべきという指定
-    //@Pattern(regexp = "^[a-zA-Z0-9]+$", message = "英数字で入力してください") // パスワードは英数字の必要があるという指定
-    //↑ここでかけるservice層でとパスワードハッシュ化しているため、
-    @NotBlank(message = "パスワードは必須項目です")
+    // パスワードの必須・形式チェックは UserController（新規/編集で分岐）で行う
     private String userPassword; // パスワードを入れる箱　DBの列名と同じなら@Columnは省略できる為name=passwordは省略
     
     @Column(name = "authority_id" , nullable = false) // 「権限ID」の列　ユーザーの権限を表すための列になります。例えば、管理者（ADMIN）1や店舗スタッフ（SHOP）2、倉庫スタッフ（WAREHOUSE）3などの区別をするために使用されます。
+    @NotNull(message = "権限を選択してください")
     private Integer authorityId; // 権限IDを入れる箱　DBの列名と同じなら@Columnは省略できる為name=authorityIdは省略
     
     @Column(name = "user_gender")// 「性別」の列　1:男性, 2:女性, 0:その他など

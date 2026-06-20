@@ -1,0 +1,13 @@
+target/
+.git/
+.gitignore
+.idea/
+.vscode/
+*.iml
+document/
+demo/
+scripts/demo-batch.ON
+.env.prod
+**/*.md
+**/nbproject/
+**/.apt_generated/

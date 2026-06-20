@@ -90,14 +90,21 @@ public class WarehouseInventoryController {
     @PostMapping("/edit/{warehouseStockId}")
     public String updateQuantity(
             @PathVariable("warehouseStockId") Integer warehouseStockId,
-            @RequestParam("quantity") Integer quantity,
+            @RequestParam(name = "quantity", required = false) String quantityText,
             @AuthenticationPrincipal UserDetails userDetails,
+            Model model,
             RedirectAttributes redirectAttributes) {
 
         User loginUser = userService.findUserByName(userDetails.getUsername());
         if (loginUser == null || loginUser.getWarehouseId() == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "所属倉庫が設定されていません。");
             return "redirect:/warehouse/inventory";
+        }
+
+        Integer quantity = parseQuantity(quantityText, model);
+        if (quantity == null) {
+            return renderEditFormOnError(loginUser.getWarehouseId(), warehouseStockId, quantityText, userDetails, model,
+                    redirectAttributes);
         }
 
         boolean ok = warehouseInventoryService.updateStockQuantity(
@@ -108,6 +115,42 @@ public class WarehouseInventoryController {
             redirectAttributes.addFlashAttribute("errorMessage", "在庫数量の更新に失敗しました。");
         }
         return "redirect:/warehouse/inventory";
+    }
+
+    private Integer parseQuantity(String quantityText, Model model) {
+        if (quantityText == null || quantityText.isBlank()) {
+            model.addAttribute("quantityError", "在庫数を入力してください");
+            return null;
+        }
+        try {
+            int value = Integer.parseInt(quantityText.strip());
+            if (value < 0) {
+                model.addAttribute("quantityError", "在庫数は0以上で入力してください");
+                return null;
+            }
+            return value;
+        } catch (NumberFormatException ex) {
+            model.addAttribute("quantityError", "在庫数は数値で入力してください");
+            return null;
+        }
+    }
+
+    private String renderEditFormOnError(
+            Integer warehouseId,
+            Integer warehouseStockId,
+            String quantityText,
+            UserDetails userDetails,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        WarehouseStock stock = warehouseInventoryService.findEditableStock(warehouseId, warehouseStockId);
+        if (stock == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "在庫が見つかりませんでした。");
+            return "redirect:/warehouse/inventory";
+        }
+        addSidebarAttributes(userDetails, model);
+        model.addAttribute("stock", stock);
+        model.addAttribute("inputQuantity", quantityText);
+        return "warehouse/inventory-edit";
     }
 
     private void addSidebarAttributes(UserDetails userDetails, Model model) {
