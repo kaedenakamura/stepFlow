@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;       // 主キー列
 import jakarta.persistence.Table;    // 対応テーブル名
 import lombok.Data; // getter/setter を自動生成
+import jakarta.validation.constraints.NotBlank;
 
 @Entity// 「このクラスはデータベースのテーブルと対応します」という印
 @Table(name = "warehouse")// 「MySQLの中の "warehouse" というテーブルを使います」という指定
@@ -16,9 +17,11 @@ public class Warehouse {
     @Column(name = "warehouse_id")
     private Integer warehouseId; // 倉庫IDを入れる箱　DBの列名と同じなら@Columnは省略できる為name=warehouseIdは省略
 
+    @NotBlank(message = "倉庫名は必須項目です")//notblankは空の場合のエラー処理
     @Column(name = "warehouse_name", nullable = false , length = 255)
     private String warehouseName;//倉庫名を入れる箱　DBの列名と同じなら@Columnは省略できる為name=warehouseNameは省略
-    @Column(name = "warehouse_address")
+    @NotBlank(message = "倉庫住所は必須項目です")
+    @Column(name = "warehouse_address" , length = 255)
     private String warehouseAddress;//倉庫住所を入れる箱　DBの列名と同じなら@Columnは省略できる為name=warehouseAddressは省略
 
     @Column(name = "delete_flag", nullable = false)

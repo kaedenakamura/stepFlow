@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+.document/
+.metadata/
+
+# Demo batch ON flag (local only)
+scripts/demo-batch.ON

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.example.stepflow.UserRepository.UserRepository;
 import com.example.stepflow.entity.User;
 
+
 @Service
 public class UserService {
 		 // ここに「ユーザーに関するビジネスロジック」を書いていきます。
@@ -63,7 +64,7 @@ public class UserService {
      */
 	public List<User> getAllUsers() {
 		// ここで「ユーザー全員の情報をデータベースから取ってきて、画面に渡す」という処理をします。
-		return userRepository. findByDeleteFlagFalse();
+		return userRepository.findByDeleteFlag(0);
 	}
 	
 	public User getUserById(Integer userId) {

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>連携倉庫一覧 - StepFlow</title>
+    <th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+    <style>
+        table { border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px 12px; }
+        th { background-color: #f2f2f2; }
+        .msg-ng { color: red; }
+    </style>
+</head>
+<body>
+    <button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+    <div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+
+    <main class="main-content">
+        <h1>連携倉庫一覧</h1>
+
+        <p th:if="${relationError}" class="msg-ng" th:text="${relationError}"></p>
+
+        <p th:if="${#lists.isEmpty(relations) and relationError == null}">
+            連携されている倉庫がありません。管理者に連携設定を依頼してください。
+        </p>
+
+        <table th:unless="${#lists.isEmpty(relations)}">
+            <thead>
+                <tr>
+                    <th>倉庫名</th>
+                    <th>倉庫住所</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="relation : ${relations}">
+                    <td>
+                        <span th:if="${relation.warehouse != null}"
+                              th:text="${relation.warehouse.warehouseName}"></span>
+                        <span th:if="${relation.warehouse == null}"
+                              th:text="|（倉庫ID: ${relation.warehouseId}）|"></span>
+                    </td>
+                    <td>
+                        <span th:if="${relation.warehouse != null}"
+                              th:text="${relation.warehouse.warehouseAddress}"></span>
+                        <span th:if="${relation.warehouse == null}">-</span>
+                    </td>
+                    <td>
+                        <a th:if="${relation.warehouseId != null}"
+                           th:href="@{/inquiry/new(warehouseId=${relation.warehouseId})}">問い合わせ</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p style="margin-top: 20px;">
+            <a th:href="@{/shop/order/new}">発注申請へ</a>
+        </p>
+    </main>
+
+    <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

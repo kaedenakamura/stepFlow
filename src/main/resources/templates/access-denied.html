@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>アクセス拒否</title>
+</head>
+<body>
+    <h2>この画面にはアクセスできません</h2>
+    <p>権限がない URL にアクセスしました。管理者専用の機能は管理者アカウントでログインしてください。</p>
+    <a th:href="@{/home}">ホームに戻る</a>
+</body>
+</html>
+
+<!-- 追加情報が必要な場合は、システム管理者にお問い合わせください。-->
+<p style="color: gray; font-size: 0.95em; margin-top: 24px;">
+    追加情報が必要な場合は、システム管理者にお問い合わせください。
+</p>
+

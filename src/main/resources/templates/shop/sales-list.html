@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>発注履歴確認</title>
+    <th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+    <style>
+        table { width: 100%; max-width: 100%; }
+    </style>
+</head>
+<body>
+    <button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+    <div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+
+    <main class="main-content">
+        <h1>発注履歴確認</h1>
+
+        <p th:if="${errorMessage != null} " class="msg-ng" th:text="${errorMessage}"></p>
+
+        <!-- 絞り込みフォーム: GET /shop/sales にクエリを付けて送る -->
+           <form class="filters" th:action="@{/shop/sales}" method="get">
+            <div class="group">
+                <label for="status">ステータス</label>
+                <select name="status" id="status" >
+                    <option value="">すべてのステータス</option>
+                    <option value="準備中" th:selected="${statusFilter == '準備中'}">準備中</option>
+                    <option value="発注済" th:selected="${statusFilter == '発注済'}">発注済</option>
+                </select>
+            </div>
+            <div class="group">
+                <label for="from">開始日</label>
+                <input type="date" name="from" th:value="${fromDate}">
+            </div>
+            <div class="group">
+                <label for="to">終了日</label>
+                <input type="date" name="to" th:value="${toDate}">
+            </div>
+            <button type="submit">絞り込む</button>
+            <a th:href="@{/shop/sales/csv(status=${statusFilter},from=${fromDate},to=${toDate})}">CSVエクスポート</a>
+            <a th:href="@{/shop/sales/pdf(status=${statusFilter},from=${fromDate},to=${toDate})}">PDFエクスポート</a>
+        </form>
+
+        <!--0件のメッセージ-->
+        <p th:if="${#lists.isEmpty(orders)}" class="empty-message">
+            表示できるデータがありません。
+        </p>
+
+        <!--発注履歴一覧-->
+        <table th:unless="${#lists.isEmpty(orders)}" class="sales-list">
+            <thead>
+                <tr>
+                    <th>商品名</th>
+                    <th>倉庫名</th>
+                    <th>発注数</th>
+                    <th>ステータス</th>
+                    <th>発注日時</th>
+                    <th>更新日時</th>
+                </tr>
+            </thead>
+         <tbody>
+            <!--ordersの中身を１件以上あるときだけ表を出す-->
+            <tr th:each="order : ${orders}">
+                <td>
+                <!-- goods が読めれば商品名、無ければID表示 -->
+                 <span th:if="${order.goods != null}" th:text="${order.goods.goodsName}"></span>
+                 <span th:if="${order.goods == null}" th:text="|（商品ID: ${order.goodsId}）|"></span>
+                </td>
+                <!--倉庫名-->
+                <td th:if="${order.warehouse != null}" th:text="${order.warehouse.warehouseName}"></td>
+                <td th:if="${order.warehouse == null}" th:text="|（倉庫ID: ${order.warehouseId}）|"></td>
+                <!--発注数-->
+                <td th:text="${order.orderQuantity}"></td>
+                <!--ステータス-->
+                <td th:text="${order.orderStatus}"></td>
+                <!--発注日時-->
+                <td th:text="${order.orderDate}"></td>
+                <!--更新日時-->
+                <td th:text="${order.updateDate}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </main>
+
+
+    <!-- 共通JS（サイドバー開閉） -->
+    <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>
+
+                    
+

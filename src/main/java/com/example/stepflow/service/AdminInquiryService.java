@@ -10,13 +10,14 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // [修正] jakarta → Spring標準の @Transactional
+import org.springframework.transaction.annotation.Transactional; // Spring標準の @Transactional
 
 import com.example.stepflow.UserRepository.UserRepository;
 import com.example.stepflow.dto.AdminInquiryListRow;
 import com.example.stepflow.entity.Inquiry;
 import com.example.stepflow.entity.User;
 import com.example.stepflow.repository.InquiryRepository;
+
 
 @Service
 public class AdminInquiryService {
@@ -44,7 +45,7 @@ public class AdminInquiryService {
 
 		Map<Integer, User> userMap = new HashMap<>();
 
-		// [修正] getUserId().u → getUserId(), u（タイポでコンパイルエラー）
+		//user_idでユーザーを取得して、userMapに格納
 		userRepository.findAllById(userIds).forEach(u -> userMap.put(u.getUserId(), u));
 
 		List<AdminInquiryListRow> rows = new ArrayList<>();
@@ -53,9 +54,9 @@ public class AdminInquiryService {
 			String name = u != null ? u.getUserName() : "(不明)";
 			// [修正] buildAffiliation(U) → buildAffiliation(u)（変数名のタイポ）
 			String affiliation = buildAffiliation(u);
-			// [修正] abbreviate メソッドが無かったため追加（下に private メソッド定義）
+			String authorityLabel = buildAuthorityLabel(u);
 			String preview = abbreviate(i.getInquiryDetail(), PREVIEW_MAX);
-			rows.add(new AdminInquiryListRow(i, name, affiliation, preview));
+			rows.add(new AdminInquiryListRow(i, name, authorityLabel, affiliation, preview));
 		}
 
 		return rows;
@@ -70,6 +71,24 @@ public class AdminInquiryService {
 		return t.length() <= max ? t : t.substring(0, max) + "…";
 	}
 
+	/** 送信者の権限ラベル */
+	private static String buildAuthorityLabel(User u) {
+		if (u == null) {
+			return "-";
+		}
+		Integer aid = u.getAuthorityId();
+		if (Integer.valueOf(1).equals(aid)) {
+			return "管理者";
+		}
+		if (Integer.valueOf(2).equals(aid)) {
+			return "店舗";
+		}
+		if (Integer.valueOf(3).equals(aid)) {
+			return "倉庫";
+		}
+		return "-";
+	}
+
 	/** userの権限に応じて所属表示文字列を作る */
 	private static String buildAffiliation(User u) {
 		if (u == null) {
@@ -81,21 +100,23 @@ public class AdminInquiryService {
 		}
 		if (Integer.valueOf(2).equals(aid)) {
 			// [修正] ER図に合わせ shop_id も表示（あれば）
-			return "店舗ID: " + (u.getShopId() != null && !u.getShopId().isBlank() ? u.getShopId() : "-");
+			return "店舗ID: " + (u.getShopId() != null ? u.getShopId() : "-");
 		}
 		if (Integer.valueOf(3).equals(aid)) {
-			return "倉庫ID: " + (u.getWarehouseId() != null && !u.getWarehouseId().isBlank() ? u.getWarehouseId() : "-");
+			return "倉庫ID: " + (u.getWarehouseId() != null ? u.getWarehouseId() : "-");
 		}
 		return "-";
 	}
 
 	/** 詳細画面用（Controller から呼ぶ） */
-	// [修正] formatAffilliation（スペルミス）→ formatAffiliation に統一
+	/** 送信者の所属を画面に渡す */
 	public String formatAffiliation(User u) {
 		return buildAffiliation(u);
 	}
 
-	// [修正] 引数 inquiryId が無かった → Integer inquiryId を追加
+	/** 詳細画面用（Controller から呼ぶ） *
+	 /
+	/** 問い合わせを取得 */
 	@Transactional(readOnly = true)
 	public Inquiry findActiveForAdmin(Integer inquiryId) {
 		return inquiryRepository.findById(inquiryId)
@@ -103,14 +124,14 @@ public class AdminInquiryService {
 				.orElse(null);
 	}
 
-	// [修正] メソッドが途中で壊れていたため整理。Controller から呼びやすい名前は updateStatus
+	/** ステータス更新 */
 	@Transactional
 	public boolean updateStatus(Integer inquiryId, String newStatus) {
 		Inquiry inv = findActiveForAdmin(inquiryId);
 		if (inv == null) {
 			return false;
 		}
-		// [修正] ステータスチェックを保存前に行う（以前は isAllowedStatus が別メソッド内に埋もれていた）
+		/** ステータスが許可されているか */
 		if (!isAllowedStatus(newStatus)) {
 			throw new IllegalArgumentException("不正なステータス: " + newStatus);
 		}
@@ -124,7 +145,8 @@ public class AdminInquiryService {
 		return updateStatus(inquiryId, status);
 	}
 
-	// [修正] logicalDelete が無かったため追加（Controller の logicalDeleta タイポ用）
+	/** 論理削除 *
+	 */
 	@Transactional
 	public boolean logicalDelete(Integer inquiryId) {
 		Inquiry inv = inquiryRepository.findById(inquiryId).orElse(null);

@@ -22,10 +22,21 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		   http.authorizeHttpRequests(auth -> auth
+
+			// 「/login」へのアクセスを誰でも許可する設定
+		       .requestMatchers("/login","/login/").permitAll()
+			   // 「/login」へのアクセスを誰でも許可する設定
 			   //登録画面と、保存処理のURLを「許可」(permitAll)する
-			   .requestMatchers("/users/new","/users/new/" ).permitAll()// 「user/new」へのアクセスを誰でも許可する設定
+			   .requestMatchers("/users/new","/users/new/" ).permitAll()
+			   // 「user/new」へのアクセスを誰でも許可する設定
 			   //登録画面と、保存処理のURLを「許可」(permitAll)する
-			   .requestMatchers(HttpMethod.POST,"/users").permitAll()// 「/users」へのPOSTアクセスを誰でも許可する設定
+			   .requestMatchers(HttpMethod.POST,"/users").permitAll()
+			   // 「/users」へのGETアクセスを誰でも許可する設定
+			   .requestMatchers(HttpMethod.GET,"/inquiry","/inquiry/").permitAll()
+			   // 「/inquiry」へのPOSTアクセスを誰でも許可する設定
+			   .requestMatchers(HttpMethod.POST,"/inquiry/send").permitAll()
+
+
 			   
 			// 管理者専用（CustomUserDetailService .roles("ADMIN") → ROLE_ADMIN）
 			   .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
@@ -34,6 +45,10 @@ public class SecurityConfig {
 			   // ログインしていて、かつ「管理者（ADMIN）」の権限を持っている人だけしか入れないように強固にガード！
 			   .requestMatchers("/users/**").hasAuthority("ROLE_ADMIN")
 			   
+			   .requestMatchers("/shop/**").hasAuthority("ROLE_SHOP")
+			   // 「/shop/**」へのアクセスを「店舗スタッフ（ROLE_SHOP）」のみ許可する設定
+			   .requestMatchers("/warehouse/**").hasAuthority("ROLE_WAREHOUSE")
+			   // 「/warehouse/**」へのアクセスを「倉庫スタッフ（ROLE_WAREHOUSE）」のみ許可する設定
 			   //静的リソース（CCS/JS）
 			   .requestMatchers("/css/**","/js/**").permitAll()// 「/css/**」と「/js/**」へのアクセスを誰でも許可する設定
 			   
@@ -41,6 +56,12 @@ public class SecurityConfig {
 			   .anyRequest().authenticated() //「それ以外」は、ログインしてる人だけ！
 			   
 			   )
+
+			   //アクセス拒否時のハンドリング
+			   .exceptionHandling(exception ->
+				 exception.accessDeniedPage("/access-denied"))
+				 //アクセス拒否時のハンドリング
+
 	   
 	   .formLogin(form -> form
 			   .loginPage("/login")// ログインページのURLを指定する設定

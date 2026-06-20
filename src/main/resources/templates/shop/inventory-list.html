@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>在庫一覧・編集 - 店舗スタッフ</title>
+    <th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+    <style>
+        .qty-input { width: 80px; padding: 6px; }
+        .btn-update { background: #2b7a78; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-update:hover { background: #17252a; }
+    </style>
+</head>
+<body>
+    <button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+    <div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+    <main class="main-content">
+        <h1>在庫管理一覧/編集</h1>
+
+        <p th:if="${successMessage}" class="msg-ok" th:text="${successMessage}"></p>
+        <p th:if="${errorMessage}" class="msg-ng" th:text="${errorMessage}"></p>
+        <p th:if="${inventoryError}" class="msg-ng" th:text="${inventoryError}"></p>
+
+        <form class="filters" th:action="@{/shop/inventory}" method="get">
+            <div class="group">
+                <label for="categoryId">カテゴリー</label>
+                <select name="categoryId" id="categoryId">
+                    <option value="">すべてのカテゴリー</option>
+                    <option th:each="category : ${categories}"
+                            th:value="${category.categoryId}"
+                            th:text="${category.categoryName}"
+                            th:selected="${selectedCategoryId != null and selectedCategoryId == category.categoryId}">
+                    </option>
+                </select>
+            </div>
+            <button type="submit">絞り込み</button>
+        </form>
+
+        <p th:if="${#lists.isEmpty(stocks) and inventoryError == null}" class="empty-message">
+            該当する在庫データがありません。
+        </p>
+
+        <table th:unless="${#lists.isEmpty(stocks)}">
+            <thead>
+                <tr>
+                    <th>商品名</th>
+                    <th>カテゴリー</th>
+                    <th>商品在庫数</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="stock : ${stocks}">
+                    <td>
+                        <span th:if="${stock.goods != null}" th:text="${stock.goods.goodsName}"></span>
+                        <span th:if="${stock.goods == null}" th:text="|（商品ID: ${stock.goodsId}）|"></span>
+                    </td>
+                    <td>
+                        <span th:if="${stock.goods != null and stock.goods.category != null}"
+                              th:text="${stock.goods.category.categoryName}"></span>
+                        <span th:if="${stock.goods == null or stock.goods.category == null}">-</span>
+                    </td>
+                    <td th:text="${stock.shopStock}"></td>
+                    <td>
+                        <a th:href="@{/shop/inventory/edit/{id}(id=${stock.shopStockId})}" class="btn-update">編集</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+
+    <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8" />
+	<title>連携一覧（管理者）</title>
+	<th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+</head>
+<body>
+	<button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+	<div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+	<main class="main-content">
+		<h2>連携一覧</h2>
+		<form class="filters" th:action="@{/admin/relations}" method="get">
+			<div class="group">
+				<label for="shopId">店舗で絞り込み</label>
+				<select name="shopId" id="shopId">
+				<option value="">すべての店舗</option>
+				<option th:each="s : ${shops}"
+						th:value="${s.shopId}"
+						th:text="${s.shopName}"
+						th:selected="${selectedShopId != null and selectedShopId == s.shopId}">
+				</option>
+			</select>
+			</div>
+			<button type="submit">絞り込み</button>
+		</form>
+		<p class="page-actions">
+			<a th:href="@{/admin/relations/new}">＋ 連携を新規登録</a>
+		</p>
+		<p th:if="${successMessage != null}" class="msg-ok" th:text="${successMessage}"></p>
+		<p th:if="${#lists.isEmpty(relations)}" class="empty-message">登録されている連携がありません。</p>
+		<table th:unless="${#lists.isEmpty(relations)}">
+			<tr>
+				<th>連携ID</th>
+				<th>店舗名</th>
+				<th>倉庫名</th>
+				<th>操作</th>
+			</tr>
+			<tr th:each="relation : ${relations}">
+				<td th:text="${relation.relationId}">1</td>
+				<td th:text="${relation.shop != null ? relation.shop.shopName : '(未登録)'}">店舗名</td>
+				<td th:text="${relation.warehouse != null ? relation.warehouse.warehouseName : '(未登録)'}">倉庫名</td>
+				<td>
+					<a th:href="@{/admin/relations/edit/{id}(id=${relation.relationId})}">編集</a>
+					<form th:action="@{/admin/relations/delete/{id}(id=${relation.relationId})}"
+						  method="post" style="display:inline;"
+						  onsubmit="return confirm('本当に削除しますか？');">
+						<button type="submit">削除</button>
+					</form>
+				</td>
+			</tr>
+		</table>
+	</main>
+	<th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

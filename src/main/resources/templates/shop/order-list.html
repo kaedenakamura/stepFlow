@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>発注一覧 - StepFlow</title>
+    <th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+    <style>
+        table { border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px 12px; }
+        th { background-color: #f2f2f2; }
+        .msg-ok { color: green; }
+        .msg-ng { color: red; }
+        .btn-update { color: blue; text-decoration: none; }
+        .btn-delete { color: red; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+    <div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+
+    <main class="main-content">
+        <h1>発注一覧</h1>
+        <div class="page-actions">
+            <a th:href="@{/shop/order}" class="btn-new">発注商品を選ぶ</a>
+            <a th:href="@{/shop/order/new}" class="btn-new">新規発注</a>
+        </div>
+
+        <p th:if="${successMessage}" class="msg-ok" th:text="${successMessage}"></p>
+        <p th:if="${errorMessage}" class="msg-ng" th:text="${errorMessage}"></p>
+        <p th:if="${orderError}" class="msg-ng" th:text="${orderError}"></p>
+
+        <p th:if="${#lists.isEmpty(orders) and orderError == null}" style="text-align: center;">
+            発注データがありません。
+        </p>
+
+        <table th:unless="${#lists.isEmpty(orders)}">
+            <thead>
+                <tr>
+                    <th>商品名</th>
+                    <th>発注数</th>
+                    <th>倉庫名</th>
+                    <th>注文状況</th>
+                    <th>注文日時</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="order : ${orders}">
+                    <td>
+                        <span th:if="${order.goods != null}" th:text="${order.goods.goodsName}"></span>
+                        <span th:if="${order.goods == null}" th:text="|（商品ID: ${order.goodsId}）|"></span>
+                    </td>
+                    <td th:text="${order.orderQuantity}"></td>
+                    <td>
+                        <span th:if="${order.warehouse != null}" th:text="${order.warehouse.warehouseName}"></span>
+                        <span th:if="${order.warehouse == null}" th:text="|（倉庫ID: ${order.warehouseId}）|"></span>
+                    </td>
+                    <td th:text="${order.orderStatus}"></td>
+                    <td th:text="${order.orderDate}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+
+    <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

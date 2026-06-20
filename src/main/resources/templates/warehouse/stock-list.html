@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>受注一覧 - StepFlow</title>
+    <th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+</head>
+<body>
+    <button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+    <div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+
+    <main class="main-content">
+        <!-- タイトル -->
+        <h1>受注一覧</h1>
+        <!-- 成功メッセージ、エラーメッセージ、エラーメッセージを表示 -->
+        <p th:if="${successMessage}" class="msg-ok" th:text="${successMessage}"></p>
+        <p th:if="${errorMessage}" class="msg-ng" th:text="${errorMessage}"></p>
+        <p th:if="${orderError}" class="msg-ng" th:text="${orderError}"></p>
+
+        <!-- 絞り込みフォーム: GET /warehouse/stock にクエリを付けて送る -->
+        <form class="filters" th:action="@{/warehouse/stock}" method="get">
+            <div class="group">
+                <!-- ステータスの絞り込みフォーム -->
+                <label for="status">ステータス</label>
+                <select name="status" id="status">
+                    <option value="">すべてのステータス</option>
+                    <option value="準備中" th:selected="${statusFilter == '準備中'}">準備中</option>
+                    <option value="発注済" th:selected="${statusFilter == '発注済'}">発注済</option>
+                </select>
+            </div>
+            <!-- 開始日と終了日の絞り込みフォーム -->
+            <div class="group">
+                <label for="from">開始日</label>
+                <input type="date" name="from" th:value="${fromDate}">
+            </div>
+            <div class="group">
+                <label for="to">終了日</label>
+                <input type="date" name="to" th:value="${toDate}">
+            </div>
+            <button type="submit">絞り込む</button>
+            <a th:href="@{/warehouse/stock/csv(status=${statusFilter},from=${fromDate},to=${toDate})}" class="btn-export">CSVエクスポート</a>
+            <a th:href="@{/warehouse/stock/pdf(status=${statusFilter},from=${fromDate},to=${toDate})}" class="btn-export">PDFエクスポート</a>
+        </form>
+        <!-- データがない場合はメッセージを表示 -->
+        <p th:if="${#lists.isEmpty(orders) and orderError == null}" class="empty-message">
+            表示できる受注データがありません。
+        </p>
+        <!-- データがある場合は表を表示 -->
+        <table th:unless="${#lists.isEmpty(orders)}">
+            <thead>
+                <tr>
+                    <th>店舗名</th>
+                    <th>商品名</th>
+                    <th>発注数</th>
+                    <th>注文状況</th>
+                    <th>注文日時</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="order : ${orders}">
+                    <td>
+                        <span th:if="${order.shop != null}" th:text="${order.shop.shopName}"></span>
+                        <span th:if="${order.shop == null}" th:text="|（店舗ID: ${order.shopId}）|"></span>
+                    </td>
+                    <td>
+                        <span th:if="${order.goods != null}" th:text="${order.goods.goodsName}"></span>
+                        <span th:if="${order.goods == null}" th:text="|（商品ID: ${order.goodsId}）|"></span>
+                    </td>
+                    <td th:text="${order.orderQuantity}"></td>
+                    <td th:text="${order.orderStatus}"></td>
+                    <td th:text="${order.orderDate}"></td>
+                    <td>
+                        <form th:action="@{/warehouse/stock/{id}/status(id=${order.shopOrderId})}"
+                              method="post" style="display: flex; gap: 8px; align-items: center;">
+                            <!-- トークンをhiddenで送る -->
+                            <input type="hidden"
+                                   th:if="${_csrf}"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}"/>
+                            <!-- フォームに絞り込み条件をhiddenで送る -->
+                            <input type="hidden" name="filterStatus" th:value="${statusFilter}">
+                            <input type="hidden" name="filterFrom" th:value="${fromDate}">
+                            <input type="hidden" name="filterTo" th:value="${toDate}">
+                            <!-- ステータス選択フォーム -->
+                            <select name="orderStatus" required>
+                                <option value="準備中" th:selected="${order.orderStatus == '準備中'}">準備中</option>
+                                <option value="発注済" th:selected="${order.orderStatus == '発注済'}">発注済</option>
+                            </select>
+                            <button type="submit">更新</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+
+    <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

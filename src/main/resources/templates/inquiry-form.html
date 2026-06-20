@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>お問い合わせ（新規） - StepFlow</title>
+    <th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+    <style>
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; }
+        .form-control { width: 100%; max-width: 480px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .btn-submit { background-color: #007bff; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; }
+        .field-error { color: #dc3545; font-size: 13px; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+    <div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+
+    <main class="main-content">
+        <h1>お問い合わせ（新規作成）</h1>
+
+        <p><a th:href="@{/inquiry}">一覧へ戻る</a></p>
+
+        <form th:action="@{/inquiry/send}" th:object="${inquiryForm}" method="post">
+            <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+            <div th:if="${#fields.hasGlobalErrors()}">
+                <p class="field-error" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+            </div>
+
+            <div class="form-group">
+                <label for="receiverRole">送信先</label>
+                <select id="receiverRole" class="form-control" th:field="*{receiverRole}" required>
+                    <option value="">送信先を選択してください</option>
+                    <option value="ROLE_ADMIN" th:unless="${authorityId == 'ROLE_ADMIN'}">管理者</option>
+                    <option value="ROLE_SHOP" th:unless="${authorityId == 'ROLE_SHOP'}">店舗スタッフ</option>
+                    <option value="ROLE_WAREHOUSE" th:unless="${authorityId == 'ROLE_WAREHOUSE'}">倉庫スタッフ</option>
+                </select>
+                <p class="field-error" th:if="${#fields.hasErrors('receiverRole')}" th:errors="*{receiverRole}"></p>
+            </div>
+
+            <div class="form-group">
+                <label for="partnerId">連絡先（店舗/倉庫を選択時のみ必須）</label>
+                <select id="partnerId" class="form-control" th:field="*{partnerId}">
+                    <option value="">-- 連絡先を選択 --</option>
+                    <option th:each="partner : ${shopPartnerList}"
+                            th:value="${partner.id}"
+                            th:text="${partner.name}"
+                            data-partner-role="ROLE_SHOP"></option>
+                    <option th:each="partner : ${warehousePartnerList}"
+                            th:value="${partner.id}"
+                            th:text="${partner.name}"
+                            data-partner-role="ROLE_WAREHOUSE"></option>
+                </select>
+                <p class="field-error" th:if="${#fields.hasErrors('partnerId')}" th:errors="*{partnerId}"></p>
+            </div>
+
+            <div class="form-group">
+                <label for="content">お問い合わせ内容</label>
+                <textarea id="content" class="form-control" rows="6" maxlength="255"
+                          placeholder="お問い合わせ内容を入力してください（255文字以内）"
+                          th:field="*{content}" required></textarea>
+                <p class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></p>
+            </div>
+
+            <button type="submit" class="btn-submit">送信する</button>
+        </form>
+    </main>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const receiverRoleSelect = document.getElementById("receiverRole");
+        const partnerIdSelect = document.getElementById("partnerId");
+
+        function updatePartnerOptions() {
+            const selectedRole = receiverRoleSelect.value;
+            const needsPartner = selectedRole === "ROLE_SHOP" || selectedRole === "ROLE_WAREHOUSE";
+
+            partnerIdSelect.querySelectorAll("option[data-partner-role]").forEach(function (opt) {
+                const visible = needsPartner && opt.getAttribute("data-partner-role") === selectedRole;
+                opt.hidden = !visible;
+                opt.disabled = !visible;
+            });
+
+            const selected = partnerIdSelect.options[partnerIdSelect.selectedIndex];
+            if (!selected || selected.hidden || selected.disabled) {
+                partnerIdSelect.value = "";
+            }
+
+            partnerIdSelect.disabled = !needsPartner;
+            partnerIdSelect.required = needsPartner;
+        }
+
+        receiverRoleSelect.addEventListener("change", updatePartnerOptions);
+        updatePartnerOptions();
+    });
+    </script>
+
+    <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

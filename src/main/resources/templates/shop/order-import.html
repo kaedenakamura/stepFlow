@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!-- A4: Excel 一括発注のアップロード画面 -->
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>発注Excel一括取り込み</title>
+    <th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+    <style>
+        .msg-ok { color: green; }
+        .msg-ng { color: red; }
+        .import-box { max-width: 640px; margin: 24px auto; }
+        .error-list { margin-top: 12px; padding-left: 20px; }
+    </style>
+</head>
+<body>
+    <button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+    <div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+
+    <main class="main-content">
+        <h1>発注Excel一括取り込み</h1>
+
+        <!-- Flash: Controller の redirectAttributes で渡したメッセージ -->
+        <p th:if="${successMessage}" class="msg-ok" th:text="${successMessage}"></p>
+        <p th:if="${errorMessage}" class="msg-ng" th:text="${errorMessage}"></p>
+
+        <div class="import-box">
+            <p>
+                <!-- A3 で作ったテンプレートと同じ列形式 -->
+                <a th:href="@{/shop/order/template/download}">テンプレートをダウンロード</a>
+                し、「<strong>発注入力</strong>」シート（商品ID・倉庫ID・発注数量）に入力してからアップロードしてください。
+            </p>
+
+            <!--
+              enctype="multipart/form-data" が無いとファイルが送れない（必須）
+              method="post" → ShopOrderController の @PostMapping("/import")
+              name="file"   → @RequestParam("file") と一致
+            -->
+            <form th:action="@{/shop/order/import}" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" accept=".xlsx" required>
+                <button type="submit">アップロードして一括発注</button>
+            </form>
+
+            <p style="margin-top: 16px;">
+                <a th:href="@{/shop/order}">← 発注商品選択に戻る</a>
+            </p>
+        </div>
+
+        <!-- 失敗行だけリスト表示（importResult.messages） -->
+        <div th:if="${importResult != null and !#lists.isEmpty(importResult.messages)}">
+            <h2>エラー詳細</h2>
+            <ul class="error-list">
+                <li th:each="msg : ${importResult.messages}" th:text="${msg}"></li>
+            </ul>
+        </div>
+    </main>
+
+    <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

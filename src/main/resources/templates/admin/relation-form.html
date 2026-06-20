@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8" />
+	<title>連携登録（管理者）</title>
+	<th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+</head>
+<body>
+	<button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+	<div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+	<main class="main-content">
+		 <!-- relationId が null なら新規、あれば編集 -->
+		<h2 th:text="${relation.relationId == null} ? '連携新規登録' : '連携編集'">連携新規登録</h2>
+
+		 <!--
+          th:action  → POST 先（@PostMapping と同じ /admin/relations）
+          th:object  → Controller の model.addAttribute("relation", ...)
+        -->
+		<form th:action="@{/admin/relations}" th:object="${relation}" method="post">
+			<!-- relationId が null なら新規、あれば編集のhiddenフィールド -->
+			<input type="hidden" th:field="*{relationId}" />
+
+			<div>
+				<label>店舗:</label>
+				<select th:field="*{shopId}">
+					<option value="">店舗を選択してください</option>
+					<option th:each="s : ${shops}"
+							th:value="${s.shopId}"
+							th:text="${s.shopName}">店舗名</option>
+				</select>
+				<p th:if="${#fields.hasErrors('shopId')}" th:errors="*{shopId}" style="color:red;"></p>
+			</div>
+
+			<div>
+				<label>倉庫:</label>
+				<select th:field="*{warehouseId}">
+					<option value="">倉庫を選択してください</option>
+					<option th:each="w : ${warehouses}"
+							th:value="${w.warehouseId}"
+							th:text="${w.warehouseName}">倉庫名</option>
+				</select>
+				<p th:if="${#fields.hasErrors('warehouseId')}" th:errors="*{warehouseId}" style="color:red;"></p>
+			</div>
+
+			<button type="submit" th:text="${relation.relationId == null} ? '登録' : '更新'">登録</button>
+		</form>
+
+		<a th:href="@{/admin/relations}">連携一覧に戻る</a>
+	</main>
+	<th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

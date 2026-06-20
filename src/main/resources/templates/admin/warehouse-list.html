@@ -10,18 +10,44 @@
 	<div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
 	<main class="main-content">
 		<h2>倉庫一覧</h2>
-		<p th:if="${#lists.isEmpty(warehouses)}">登録されている倉庫がありません。</p>
-		<table border="1" cellpadding="8" th:unless="${#lists.isEmpty(warehouses)}">
+		<form class="filters" th:action="@{/admin/warehouses}" method="get">
+			<div class="group">
+				<label for="address">住所で絞り込み</label>
+				<input type="text" name="address" id="address" th:value="${addressFilter}" placeholder="例: 大阪">
+			</div>
+			<button type="submit">絞り込み</button>
+		</form>
+		<p class="page-actions">
+			<a th:href="@{/admin/warehouses/new}">+新規倉庫登録</a>
+		</p>
+		<p th:if="${successMessage != null}" class="msg-ok" th:text="${successMessage}">新規登録完了しました</p>
+
+		<p th:if="${#lists.isEmpty(warehouses)}" class="empty-message">
+			該当する倉庫がありません。</p>
+
+		<table th:unless="${#lists.isEmpty(warehouses)}">
 			<tr>
 				<th>倉庫ID</th>
 				<th>倉庫名</th>
+				<th>住所</th>
+				<th>操作</th>
 			</tr>
 			<tr th:each="warehouse : ${warehouses}">
 				<td th:text="${warehouse.warehouseId}">1</td>
 				<td th:text="${warehouse.warehouseName}">倉庫名</td>
+				<td th:text="${warehouse.warehouseAddress}">住所</td>
+				<td>
+					<a th:href="@{/admin/warehouses/edit/{id}(id=${warehouse.warehouseId})}">編集</a>
+					<form th:action="@{/admin/warehouses/delete/{id}(id=${warehouse.warehouseId})}" method="post"
+					 style="display:inline;"
+					 onsubmit="return confirm('本当に削除しますか？');">
+					<button type="submit">削除</button>
+					</form>
+				</td>
 			</tr>
 		</table>
 	</main>
 	<th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+
 </body>
 </html>

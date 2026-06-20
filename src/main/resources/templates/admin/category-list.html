@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>カテゴリ一覧（管理者）</title>
+    <th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+</head>
+<body>
+    <button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+    <div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+    <main class="main-content">
+        <h2>カテゴリー一覧（管理者用）</h2>
+        <p class="page-actions">
+            <a th:href="@{/admin/categories/new}">+ 新規カテゴリー登録</a>
+        </p>
+        <p th:if="${successMessage != null}" class="msg-ok" th:text="${successMessage}"></p>
+        <p th:if="${errorMessage != null}" class="msg-ng" th:text="${errorMessage}"></p>
+
+        <p th:if="${#lists.isEmpty(categories)}" class="empty-message">登録されているカテゴリーがありません。</p>
+        <table th:unless="${#lists.isEmpty(categories)}">
+            <tr>
+                <th>カテゴリーID</th>
+                <th>カテゴリー名</th>
+                <th>操作</th>
+            </tr>
+            <tr th:each="category : ${categories}">
+                <td th:text="${category.categoryId}">1</td>
+                <td th:text="${category.categoryName}">カテゴリー名</td>
+                <td>
+                    <a th:href="@{/admin/categories/edit/{id}(id=${category.categoryId})}">編集</a>
+                    <form th:action="@{/admin/categories/delete/{id}(id=${category.categoryId})}"
+                        method="post" style="display:inline;"
+                        onsubmit="return confirm('本当に削除しますか？');">
+                        <button type="submit">削除</button>
+                    </form>
+                </td>
+            </tr>
+        </table>
+    </main>
+    <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>店舗登録(管理者用)</title>
+        <!--共通CSS-->
+        <th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+        </head>
+
+        <body>
+            <button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+            <!--共通サイドバー-->
+            <div th:replace="~{common/sidebar :: sidebar-fragment}">
+            </div>
+            <main class="main-content">
+                <!--shopIdがnullなら新規、あれば編集-->
+            <h2 th:text="${shop.shopId == null} ? '店舗新規登録' : '店舗編集'">店舗新規登録</h2>
+            <!--編集時用：主キーをhiddenで送る新規は空-->
+                <!--
+          th:action → 送信先 URL
+          th:object → Controller の model.addAttribute("shop", ...)
+          method="post" → @PostMapping と対になる
+        -->
+          <form th:action="@{/admin/shops}" th:object="${shop}" method="post">
+              <!-- 編集時は主キーを hidden で送る。新規は空 -->
+          <input type="hidden" th:field="*{shopId}">
+
+          <div>
+            <label>店舗名:</label>
+            <input type="text" th:field="*{shopName}" placeholder="店舗名を入力してください">
+            <p th:if="${#fields.hasErrors('shopName')}" th:errors="*{shopName}" style="color:red;"></p>
+          </div>
+
+          <div>
+            <label>店舗住所</label>
+            <input type="text" th:field="*{shopAddress}">
+            <p th:if="${#fields.hasErrors('shopAddress')}" th:errors="*{shopAddress}" style="color:red;"></p>
+          </div>
+
+          <button type="submit" th:text="${shop.shopId == null} ? '登録' : '更新' "style="display: block; margin: 20px auto;">登録</button>
+          </form>
+
+          <a th:href="@{/admin/shops}" style="display: block; text-align: center;">店舗一覧へ戻る</a>
+        </main>
+
+    </form>
+
+    <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+
+</body>
+</html>
+
+
+
+
+
+

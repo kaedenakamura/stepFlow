@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>お問い合わせ詳細 - StepFlow</title>
+    <th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+    <style>
+        .msg-ng { color: red; }
+        .msg-ok { color: green; }
+        .detail-block { margin: 16px 0; }
+        .detail-body { white-space: pre-wrap; border: 1px solid #ccc; padding: 12px; background: #fafafa; }
+        .btn-delete { background-color: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        .btn-save { margin-left: 8px; }
+    </style>
+</head>
+<body>
+    <button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+    <div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+
+    <main class="main-content">
+        <h1>お問い合わせ詳細</h1>
+
+        <p><a th:href="@{/inquiry}">一覧へ戻る</a></p>
+        <p class="msg-ok" th:if="${successMessage}" th:text="${successMessage}"></p>
+        <p class="msg-ng" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
+        <div class="detail-block">
+            <p><strong>送信日時:</strong> <span th:text="${inquiry.inquiryDate}"></span></p>
+            <p><strong>送信者:</strong> <span th:text="${sender != null ? sender.userName : '(不明)'}"></span></p>
+            <p><strong>権限:</strong> <span th:text="${authorityLabel}"></span></p>
+            <p><strong>所属:</strong> <span th:text="${affiliationDisplay}"></span></p>
+        </div>
+
+        <div class="detail-block">
+            <p><strong>内容</strong></p>
+            <div class="detail-body" th:text="${inquiry.inquiryDetail}"></div>
+        </div>
+
+        <div class="detail-block">
+            <form th:action="@{/inquiry/{id}/status(id=${inquiry.inquiryId})}" method="post">
+                <label for="inquiryStatus"><strong>ステータス</strong></label>
+                <select id="inquiryStatus" name="inquiryStatus">
+                    <option value="未対応" th:selected="${inquiry.inquiryStatus == '未対応'}">未対応</option>
+                    <option value="対応中" th:selected="${inquiry.inquiryStatus == '対応中'}">対応中</option>
+                    <option value="対応済" th:selected="${inquiry.inquiryStatus == '対応済'}">対応済</option>
+                </select>
+                <button class="btn-save" type="submit">保存</button>
+            </form>
+        </div>
+
+        <div class="detail-block">
+            <form th:action="@{/inquiry/{id}/delete(id=${inquiry.inquiryId})}" method="post"
+                  onsubmit="return confirm('この問い合わせを削除しますか？');">
+                <button class="btn-delete" type="submit">削除</button>
+            </form>
+        </div>
+    </main>
+
+    <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

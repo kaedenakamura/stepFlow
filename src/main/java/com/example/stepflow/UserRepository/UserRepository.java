@@ -14,6 +14,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     // 「Userクラスのデータを扱い、主キー（ID）はInteger型ですよ」という意味
     // これだけで、save() や findAll() など使える
 	User findUserByUserName(String userName); // 「ユーザー名でユーザーを検索する」という処理を定義、名前でログイン機能を利用するため必要な処理。IDならfindByIDで省略してもいい
-	List<User> findByDeleteFlagFalse(); // 「削除フラグでユーザーを検索する」という処理を定義、ユーザーの論理削除のため必要な処理
+	List<User> findByDeleteFlag(Integer deleteFlag); // 削除フラグ（0=有効）でユーザーを検索
 	List<User> findByAuthorityIdAndDeleteFlag(Integer authorityId ,Integer deleteFlag);// 「権限IDでユーザーを検索する」という処理を定義、ユーザーの権限管理のため必要な処理
 	}

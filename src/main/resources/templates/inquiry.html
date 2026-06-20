@@ -43,21 +43,45 @@
 </style>
 </head>
 <body>
-	<button class="menu-trigger" id="js-hamburger">☰</button>
+  <!--ログインしている場合サイドバー表示 unlessは条件に合わない場合のみ表示-->
+	<th:block th:unless="${guestMode}">
+  <button  class="menu-trigger" id="js-hamburger">☰</button>
 	<div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
-	
+	</th:block>
+  <!--ゲストモードの場合、サイドバーを非表示にする-->
+  <div class="inquiry-container" th:style="${guestMode} ?
+   'margin-left:0;padding:30px;max-width:600px;margin:0 auto;' : ''"></div>
 
 <div class="inquiry-container">
 <h2>お問い合わせ</h2> 
 <hr> <!-- 区切り線 -->
-
 <!-- #fields は th:object があるフォームの「内側」でしか使えない。全体エラーも form 先頭へ移動 -->
 <form th:action="@{/inquiry/send}" th:object="${inquiryForm}" method="post">
-
+  <!--CSRFトークン-->
+  <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+  <!--bindingResult.reject(...) などの全体エラー-->
   <div th:if="${#fields.hasGlobalErrors()}"> <!-- bindingResult.reject(...) などの全体エラー -->
     <p class="field-error" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
   </div>
 
+  <th:block th:if="${guestMode}">
+    <p>管理者宛に送信されます（ログイン不要）</p>
+  
+    <div class="form-group">
+      <label for="content" style="color:red;">お問い合わせ内容</label>
+      <textarea id="content" class="form-control" rows="6" maxlength="255"
+                placeholder="お問い合わせ内容を入力してください（255文字以内）"
+                th:field="*{content}"></textarea>
+      <p class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></p>
+    </motion>
+  
+    <button type="submit" class="btn-submit">送信する</button>
+    <p style="margin-top:16px;"><a th:href="@{/login}">ログイン画面へ戻る</a></p>
+  </th:block>
+
+
+
+  
   <div class="form-group"> <!-- 送信先ブロック -->
     <label for="receiverRole" style="color:red;">送信先</label> <!-- ラベル（必須の目印） -->
     <select id="receiverRole" class="form-control" th:field="*{receiverRole}"> <!-- th:fieldでDTOのreceiverRoleと自動連携 -->

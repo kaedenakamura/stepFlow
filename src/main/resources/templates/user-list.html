@@ -6,25 +6,14 @@
 	<th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
 	<style>
 		.user-list {
-			border-collapse: collapse;
 			width: 90%;
 			max-width: 900px;
-			margin: 20px auto;
 		}
 		.user-list th, .user-list td {
-			border: 1px solid #ccc;
-			padding: 10px;
 			text-align: center;
-		}
-		.user-list th {
-			background-color: #f2f2f2;
 		}
 		.user-list tr:nth-child(even) {
 			background-color: #f9f9f9;
-		}
-		.page-actions {
-			margin-bottom: 20px;
-			text-align: center;
 		}
 	</style>
 </head>
@@ -32,10 +21,23 @@
 	<button type="button" class="menu-trigger" id="js-hamburger">☰</button>
 	<div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
 	<main class="main-content">
-		<h1 style="text-align: center;">ユーザー一覧（管理者用）</h1>
+		<h1>ユーザー一覧（管理者用）</h1>
 		<div class="page-actions">
 			<a th:href="@{/users/new}">＋ 新規ユーザー登録</a>
 		</div>
+		<form th:action="@{/users}" method="get" class="filters">
+			<div class="group">
+				<label for="authorityId">絞り込み</label>
+				<select name="authorityId" id="authorityId">
+				<option value="" >すべてのユーザー</option>
+				<option value="1" th:selected="${selectedAuthorityId != null && selectedAuthorityId == 1}">管理者</option>
+				<option value="2" th:selected="${selectedAuthorityId != null && selectedAuthorityId == 2}">店舗スタッフ</option>
+				<option value="3" th:selected="${selectedAuthorityId != null && selectedAuthorityId == 3}">倉庫スタッフ</option>
+			</select>
+			</div>
+			<button type="submit">絞り込む</button>
+		</form>
+
 		<table class="user-list">
 			<thead>
 				<tr>
@@ -57,7 +59,6 @@
 					<td>
 						<a th:href="@{/users/edit/{id}(id=${user.userId})}">編集</a>
 						<form th:action="@{/users/delete/{id}(id=${user.userId})}" method="post" style="display:inline;">
-							<input type="hidden" name="_method" value="delete" />
 							<button type="submit" onclick="return confirm('本当に削除しますか？')">削除</button>
 						</form>
 					</td>

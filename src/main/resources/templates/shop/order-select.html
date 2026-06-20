@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>発注商品選択 - StepFlow</title>
+    <th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+    <style>
+        table { border-collapse: collapse; margin-top: 20px; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px 12px; }
+        th { background-color: #f2f2f2; }
+        .msg-ok { color: green; }
+        .msg-ng { color: red; }
+        .page-actions { margin: 0 auto; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .filters { margin: 16px 0; display: flex; gap: 12px; flex-wrap: wrap; align-items: end; justify-content: center; }
+        .filters label { font-weight: bold; margin-right: 6px; }
+        .filters .group { display: inline-flex; flex-direction: column; gap: 4px; }
+        .btn-order { padding: 6px 12px; text-decoration: none; border: 1px solid #333; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+    <div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+
+    <main class="main-content">
+        <h1>発注商品選択</h1>
+
+        <p th:if="${successMessage}" class="msg-ok" th:text="${successMessage}"></p>
+        <p th:if="${errorMessage}" class="msg-ng" th:text="${errorMessage}"></p>
+        <p th:if="${selectionError}" class="msg-ng" th:text="${selectionError}"></p>
+
+        <div class="page-actions">
+            <a th:href="@{/shop/order/list}" class="btn-new">発注一覧</a>
+            <a th:href="@{/shop/order/new}" class="btn-new">商品を選ばずに発注</a>
+            <a th:href="@{/shop/order/template/download}" class="btn-new">発注用Excelテンプレートをダウンロード</a>
+            <!-- A4: テンプレに入力した Excel をアップロード -->
+            <a th:href="@{/shop/order/import}" class="btn-new">Excel一括発注</a>
+        </div>
+
+        <form class="filters" th:action="@{/shop/order}" method="get">
+            <div class="group">
+                <label for="categoryId" style="display: inline; width: 120px; font-weight: bold;">カテゴリ:</label>
+                <select name="categoryId" id="categoryId">
+                    <option value="">すべて</option>
+                    <option th:each="category : ${categories}"
+                            th:value="${category.categoryId}"
+                            th:text="${category.categoryName}"
+                            th:selected="${selectedCategoryId != null and selectedCategoryId.equals(category.categoryId)}">
+                    </option>
+                </select>
+            </div>
+            <button type="submit">絞り込む</button>
+        </form>
+
+        <p th:if="${#lists.isEmpty(goodsRows) and selectionError == null}" style="text-align: center;">
+            表示できる商品がありません。
+        </p>
+
+        <table th:unless="${#lists.isEmpty(goodsRows)}">
+            <thead>
+                <tr>
+                    <th>商品名</th>
+                    <th>カテゴリ</th>
+                    <th>連携先合計在庫</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="row : ${goodsRows}">
+                    <td th:text="${row.goodsName}"></td>
+                    <td th:text="${row.categoryName != null ? row.categoryName : '—'}"></td>
+                    <td th:text="${row.linkedWarehouseTotalStock}"></td>
+                    <td>
+                        <a class="btn-order"
+                           th:href="@{/shop/order/new(goodsId=${row.goodsId})}">この商品を発注</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+
+    <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

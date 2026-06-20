@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>商品一覧（管理者）</title>
+    <th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+</head>
+<body>
+    <button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+    <div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+    <main class="main-content">
+        <h2>商品一覧（管理者用）</h2>
+        <p class="page-actions">
+            <a th:href="@{/admin/goods/new}">+ 新規商品登録</a>
+        </p>
+        <form class="filters" th:action="@{/admin/goods}" method="get">
+            <div class="group">
+                <label for="categoryId">カテゴリーで絞り込み</label>
+                <select name="categoryId" id="categoryId">
+                <option value="">すべてのカテゴリー</option>
+                <option th:each="c : ${categories}"
+                        th:value="${c.categoryId}"
+                        th:text="${c.categoryName}"
+                        th:selected="${selectedCategoryId != null and selectedCategoryId == c.categoryId}">
+                </option>
+            </select>
+            </div>
+            <button type="submit">絞り込み</button>
+        </form>
+        <p th:if="${successMessage != null}" class="msg-ok" th:text="${successMessage}"></p>
+        <p th:if="${errorMessage != null}" class="msg-ng" th:text="${errorMessage}"></p>
+
+        <p th:if="${#lists.isEmpty(goods)}" class="empty-message">登録されている商品がありません。</p>
+        <table th:unless="${#lists.isEmpty(goods)}">
+            <tr>
+                <th>商品ID</th>
+                <th>商品名</th>
+                <th>カテゴリー名</th>
+                <th>操作</th>
+            </tr>
+            <tr th:each="g : ${goods}">
+                <td th:text="${g.goodsId}">1</td>
+                <td th:text="${g.goodsName}">商品名</td>
+                <td th:text="${g.category != null ? g.category.categoryName : ''}">カテゴリー名</td>
+                <td>
+                    <a th:href="@{/admin/goods/edit/{id}(id=${g.goodsId})}">編集</a>
+                    <form th:action="@{/admin/goods/delete/{id}(id=${g.goodsId})}"
+                        method="post" style="display:inline;"
+                        onsubmit="return confirm('本当に削除しますか？');">
+                        <button type="submit">削除</button>
+                    </form>
+                </td>
+            </tr>
+        </table>
+    </main>
+    <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

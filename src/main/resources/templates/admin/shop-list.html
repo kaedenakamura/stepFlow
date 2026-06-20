@@ -10,16 +10,39 @@
 	<div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
 	<main class="main-content">
 		<h2>店舗一覧</h2>
-		<p th:if="${shopError}" th:text="${shopError}" style="color:#dc3545;"></p>
-		<p th:if="${#lists.isEmpty(shops)}">登録されている店舗がありません。</p>
-		<table border="1" cellpadding="8" th:unless="${#lists.isEmpty(shops)}">
+		<form class="filters" th:action="@{/admin/shops}" method="get">
+			<div class="group">
+				<label for="address">住所で絞り込み</label>
+				<input type="text" name="address" id="address" th:value="${addressFilter}" placeholder="例: 東京">
+			</div>
+			<button type="submit">絞り込み</button>
+		</form>
+		<p class="page-actions">
+			<a th:href="@{/admin/shops/new}">+ 店舗を新規登録</a>
+		</p>
+		<p th:if="${successMessage != null}" class="msg-ok" th:text="${successMessage}"></p>
+		<p th:if="${shopError}" class="msg-ng" th:text="${shopError}"></p>
+		<p th:if="${#lists.isEmpty(shops) and shopError == null}" class="empty-message">該当する店舗がありません。</p>
+		<table th:unless="${#lists.isEmpty(shops)}">
 			<tr>
 				<th>店舗ID</th>
 				<th>店舗名</th>
+				<th>住所</th>
+				<th>操作</th>
 			</tr>
 			<tr th:each="s : ${shops}">
 				<td th:text="${s.shopId}">1</td>
 				<td th:text="${s.shopName}">店舗名</td>
+				<td th:text="${s.shopAddress}">住所</td>
+				<td>
+				    <a th:href="@{/admin/shops/edit/{id}(id=${s.shopId})}">編集</a>
+				<form th:action="@{/admin/shops/delete/{id}(id=${s.shopId})}" method="post"
+				 style="display:inline;"
+				 onsubmit="return confirm('本当に削除しますか？');">
+				 <!--onsubmitはフォームが送信される前に確認メッセージを表示するための属性-->
+				 <button type="submit">削除</button>
+				</form>
+				</td>
 			</tr>
 		</table>
 	</main>

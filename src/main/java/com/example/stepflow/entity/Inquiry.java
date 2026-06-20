@@ -2,13 +2,17 @@ package com.example.stepflow.entity;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JacksonInject;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table; // 対応するテーブル名を指定する印
-
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
 import lombok.Data;
 
 @Entity
@@ -23,6 +27,10 @@ public class Inquiry {
 	
 	@Column(name = "user_id", nullable = false)
 	private Integer userId;// 問い合わせをしたユーザーのIDを入れる箱　DBの列
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", insertable = false, updatable = false)
+	private User user; // 問い合わせをしたユーザーを入れる箱　DBの列
 	
 	@Column(name = "inquiry_category_id", nullable = false)
 	private Integer inquiryCategoryId;// 問い合わせのカテゴリIDを入れる箱　DBの列

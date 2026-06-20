@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>お問い合わせ（未ログイン） - StepFlow</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
+        textarea { width: 100%; padding: 10px; box-sizing: border-box; }
+        .btn-submit { background: #007bff; color: #fff; border: none; padding: 12px 20px; cursor: pointer; }
+        .field-error { color: #dc3545; font-size: 13px; }
+        .msg-ok { color: green; }
+    </style>
+</head>
+<body>
+    <h1>お問い合わせ</h1>
+    <p>管理者宛に送信されます（ログイン不要）</p>
+
+    <p th:if="${successMessage}" class="msg-ok" th:text="${successMessage}"></p>
+
+    <form th:action="@{/inquiry/send}" th:object="${inquiryForm}" method="post">
+        <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+        <div class="form-group">
+            <label for="content">お問い合わせ内容</label>
+            <textarea id="content" rows="6" maxlength="255"
+                      placeholder="お問い合わせ内容を入力してください（255文字以内）"
+                      th:field="*{content}" required></textarea>
+            <p class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></p>
+        </div>
+
+        <button type="submit" class="btn-submit">送信する</button>
+    </form>
+
+    <p style="margin-top: 20px;"><a th:href="@{/login}">ログイン画面へ</a></p>
+</body>
+</html>

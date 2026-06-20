@@ -38,6 +38,7 @@ public class AdminInquiryController {
 	@Autowired
 	private UserService userService;
 
+
 	@GetMapping
 	public String list(
 			@RequestParam(name = "status", required = false) String statusFilter,
@@ -121,4 +122,5 @@ public class AdminInquiryController {
 				.orElse("");
 		model.addAttribute("authorityId", authorityId);
 	}
+
 }

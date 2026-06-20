@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8" />
+        <title>カテゴリー登録（管理者用）</title>
+        <th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+    </head>
+    <body>
+        <button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+        <div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+        <main class="main-content">
+
+        <h2 style="text-align: center;">カテゴリー登録（管理者用）</h2>
+        <p th:if="${successMessage != null}" style="color:green; text-align: center; margin-bottom: 20px;">
+            <p th:text="${successMessage}">登録完了しました</p>
+        </p>
+        <p th:if="${errorMessage != null}" style="color:red; text-align: center; margin-bottom:20px;">
+            <p th:text="${errorMessage}">エラーが発生しました</p>
+        </p>
+        <h2 th:text="${category.categoryId == null} ? '新規カテゴリ登録' : 'カテゴリ編集'">カテゴリー登録・編集
+        </h2>
+        <form th:action="@{/admin/categories}" th:object="${category}" method="post" style="width: 300px; margin: 0 auto;">
+                <!-- 編集時用：主キーを hidden で送る -->
+                 <input type="hidden" th:field="*{categoryId}">
+            <div class="form-group">
+                <label>カテゴリー名:</label>
+                <input type="text" th:field="*{categoryName}" placeholder="カテゴリー名を入力してください"/>
+                <p th:if="${#fields.hasErrors('categoryName')}" th:errors="*{categoryName}" style="color:red;"></p>
+            </div>
+            <button type="submit"
+            th:text="${category.categoryId == null} ? '登録' : '更新'">
+            </button>
+        </form>
+           <a th:href="@{/admin/categories}">戻る</a>
+        </main>
+        <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+    </body>
+</html>
+

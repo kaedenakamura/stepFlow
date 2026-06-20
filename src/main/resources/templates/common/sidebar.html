@@ -14,24 +14,30 @@
 		<a th:href="@{/admin/inquiries}">問い合わせ一覧</a>
 		<a th:href="@{/admin/warehouses}">倉庫一覧</a>
 		<a th:href="@{/admin/shops}">店舗一覧</a>
+		<a th:href="@{/admin/relations}">連携一覧</a>
+		<a th:href="@{/admin/categories}">カテゴリ一覧</a>
+		<a th:href="@{/admin/goods}">商品一覧</a>
 		<a th:href="@{/admin/system-settings}">システム設定</a>
 	</div>
-
+	
 	<div th:if="${authorityId == 'ROLE_SHOP' || authorityId == 'SHOP'}">
 		<p class="role-label role-shop">店舗業務メニュー</p>
-		<a th:href="@{/shop/sales}">売上入力・確認</a>
+		<a th:href="@{/shop/sales}">発注履歴確認</a>
+		<a th:href="@{/shop/relations}">連携倉庫一覧</a>
 		<a th:href="@{/shop/order}">店舗発注申請</a>
+		<a th:href="@{/shop/inventory}">在庫一覧・編集</a>
 	</div>
 
 	<div th:if="${authorityId == 'ROLE_WAREHOUSE' || authorityId == 'WAREHOUSE'}">
 		<p class="role-label role-warehouse">倉庫業務メニュー</p>
-		<a th:href="@{/warehouse/stock}">出荷指示一覧</a>
-		<a th:href="@{/warehouse/inventory}">在庫棚卸管理</a>
+		<a th:href="@{/warehouse/inventory}">在庫一覧・編集</a>
+		<a th:href="@{/warehouse/stock}">受注一覧</a>
 	</div>
 
 	<hr class="logout-hr">
 
 	<form th:action="@{/logout}" method="post">
+		<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
 		<button type="submit" class="logout-btn">ログアウト</button>
 	</form>
 </div>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>在庫編集 - 倉庫</title>
+    <th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+    <style>
+        .form-group { margin-bottom: 15px; }
+        label { display: inline-block; width: 100px; font-weight: bold; }
+        .qty-input { width: 120px; padding: 8px; }
+        .btn-save { padding: 8px 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+    <div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+
+    <main class="main-content">
+        <h1>在庫編集</h1>
+
+        <p th:if="${errorMessage}" style="color: #dc3545;" th:text="${errorMessage}"></p>
+
+        <p>商品名:
+            <span th:if="${stock.goods != null}" th:text="${stock.goods.goodsName}"></span>
+            <span th:if="${stock.goods == null}" th:text="|（商品ID: ${stock.goodsId}）|"></span>
+        </p>
+        <p>現在の在庫数: <span th:text="${stock.warehouseStock}"></span></p>
+
+        <form th:action="@{/warehouse/inventory/edit/{id}(id=${stock.warehouseStockId})}" method="post">
+            <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <div class="form-group">
+                <label for="quantity">在庫数:</label>
+                <input type="number" id="quantity" name="quantity" class="qty-input" min="0" required
+                       th:value="${stock.warehouseStock}"/>
+            </div>
+            <button type="submit" class="btn-save">保存</button>
+        </form>
+
+        <p style="margin-top: 20px;">
+            <a th:href="@{/warehouse/inventory}">在庫一覧へ戻る</a>
+        </p>
+    </main>
+
+    <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

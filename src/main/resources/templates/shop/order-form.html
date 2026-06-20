@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>発注申請 - StepFlow</title>
+    <th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+    <style>
+        .form-group { margin-bottom: 15px; }
+        label { display: inline-block; width: 120px; font-weight: bold; }
+        select, input { padding: 8px; min-width: 240px; }
+        .msg-ng { color: red; }
+    </style>
+</head>
+<body>
+    <button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+    <div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+
+    <main class="main-content">
+        <h1>発注申請</h1>
+
+        <form th:action="@{/shop/order}" th:object="${shopOrderForm}" method="post">
+            <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+            <div class="form-group">
+                <label for="warehouseId">連携倉庫</label>
+                <select id="warehouseId" th:field="*{warehouseId}" required>
+                    <option value="">-- 倉庫を選択 --</option>
+                    <option th:each="relation : ${relations}"
+                            th:value="${relation.warehouseId}"
+                            th:text="${relation.warehouse != null ? relation.warehouse.warehouseName : relation.warehouseId}"></option>
+                </select>
+                <p th:if="${#fields.hasErrors('warehouseId')}" class="msg-ng" th:errors="*{warehouseId}"></p>
+            </div>
+
+            <div class="form-group">
+                <label for="goodsId">商品</label>
+                <select id="goodsId" th:field="*{goodsId}" required th:disabled="${preselectedGoodsId != null}">
+                    <option value="">-- 商品を選択 --</option>
+                    <option th:each="g : ${goodsList}"
+                            th:value="${g.goodsId}"
+                            th:text="${g.goodsName}"
+                            th:selected="${shopOrderForm.goodsId != null and shopOrderForm.goodsId == g.goodsId}"></option>
+                </select>
+                <!-- disabled の select は POST されないので hidden で goodsId を送る -->
+                <input type="hidden" name="goodsId" th:if="${preselectedGoodsId != null}"
+                       th:value="${shopOrderForm.goodsId}"/>
+                <p th:if="${#fields.hasErrors('goodsId')}" class="msg-ng" th:errors="*{goodsId}"></p>
+            </div>
+
+            <div class="form-group">
+                <label for="orderQuantity">発注数量</label>
+                <input type="number" id="orderQuantity" th:field="*{orderQuantity}" min="1" required/>
+                <p th:if="${#fields.hasErrors('orderQuantity')}" class="msg-ng" th:errors="*{orderQuantity}"></p>
+            </div>
+
+            <button type="submit">申請する</button>
+        </form>
+
+        <p style="margin-top: 20px;">
+            <a th:href="@{/shop/order}">発注商品選択へ戻る</a>
+            <span> | </span>
+            <a th:href="@{/shop/order/list}">発注一覧へ</a>
+        </p>
+    </main>
+
+    <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

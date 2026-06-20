@@ -14,6 +14,7 @@ public class AdminInquiryListRow {
 	
 	private final Inquiry inquiry;//お問合せ本体
 	private final String userName;//送信者氏名
+	private final String authorityLabel;//送信者の権限（管理者/店舗/倉庫）
 	private final String affiliationDisplay;//所属の表示用文字列
 	private final String contentPreview;//一覧用に短くした本文
 }

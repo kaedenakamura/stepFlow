@@ -56,12 +56,19 @@
         </div>
 		<div class="form-group" id="shop-group">
 			 <label >所属店舗:</label>
-			 <input type="text" th:field="*{shopId}" id="shopId" />
+			 <select th:field="*{shopId}" id="shopId">
+				<option value="" disabled selected>店舗を選択してください</option>
+				<option th:each="shop : ${shops}" th:value="${shop.shopId}" th:text="${shop.shopName}">店舗名</option>
+			</select>
+
 			 <p th:if="${#fields.hasErrors('shopId')}" th:errors="*{shopId}" style="color:red;"></p>
 		</div>	 
 		<div class="form-group" id="warehouse-group">
 				<label >所属倉庫:</label>
-				 <input type="text" th:field="*{warehouseId}" id="warehouseId" />
+				 <select th:field="*{warehouseId}" id="warehouseId">
+					<option value="" disabled selected>倉庫を選択してください</option>
+					<option th:each="warehouse : ${warehouses}" th:value="${warehouse.warehouseId}" th:text="${warehouse.warehouseName}">倉庫</option>					
+				 </select>
 				 <p th:if="${#fields.hasErrors('warehouseId')}" th:errors="*{warehouseId}" style="color:red;"></p>
 		</div>
 		<div class="form-group">

@@ -22,6 +22,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 番号は自動でプラス1
     @Column(name = "user_id") // 「MySQL側では user_id という列名ですよ」という指定
     private Integer userId; // Java側での変数名
+
     
     @Column(name = "user_name" ,nullable = false, unique = true , length = 255 ) //名前は一意（unique）かつ255文字以内で、空（null）を許さない（nullable = false）という指定
     private String userName;// 名前を入れる箱　DBの列名と同じなら@Columnは省略できる為name=nameは省略")
@@ -39,12 +40,13 @@ public class User {
     @Column(name = "user_gender")// 「性別」の列　1:男性, 2:女性, 0:その他など
     private Integer userGender; // 性別を入れる箱　DBの列名と同じなら@Column は省略できる為name=genderは省略　1:男性, 2:女性, 0:その他など
     
-    // 例えば、「所属」というのは「どこの店舗に所属しているか」などを表す列になります。
-    @Column(name="shop_id")// 「所属」の列　店舗スタッフや倉庫スタッフの場合は、どこの店舗に所属しているかを表すための列になります。
-    private String shopId; // 所属を入れる箱　DBの列名と同じなら@Columnは省略できる為name=affiliationは省略
-    
-    @Column(name="warehouse_id")// 「作成日時」の列　ユーザーが新規登録された日時を記録するための列になります。
-    private String warehouseId; // 作成日時を入れる箱　DBの列名と同じなら@Columnは省略できる為name=createdAtは省略
+    /** 店舗スタッフの所属（FK → shop.shop_id）。管理者は null */
+    @Column(name = "shop_id")
+    private Integer shopId;
+
+    /** 倉庫スタッフの所属（FK → warehouse.warehouse_id）。管理者は null */
+    @Column(name = "warehouse_id")
+    private Integer warehouseId;
     
     //isDeletedは論理削除のためのフラグで、trueなら削除されたとみなす。
     @Column(name = "delete_flag", nullable = false)// 「削除フラグ」の列　論理削除のためのフラグで、trueなら削除されたとみなす。

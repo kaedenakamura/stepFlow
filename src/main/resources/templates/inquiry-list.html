@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>お問い合わせ一覧 - StepFlow</title>
+    <th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+    <style>
+        .btn-delete { color: #dc3545; margin-left: 8px; }
+        .inline-form { display: inline; margin: 0; }
+    </style>
+</head>
+<body>
+    <button type="button" class="menu-trigger" id="js-hamburger">☰</button>
+    <div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
+
+    <main class="main-content">
+        <h1>お問い合わせ一覧</h1>
+
+        <p class="page-actions">
+            <a th:href="@{/inquiry/new}">＋ 新規お問い合わせ</a>
+        </p>
+
+        <form class="filters" th:action="@{/inquiry}" method="get">
+            <div class="group">
+                <label for="status">ステータス</label>
+                <select name="status" id="status">
+                <option value="">すべて</option>
+                <option value="未対応" th:selected="${statusFilter == '未対応'}">未対応</option>
+                <option value="対応中" th:selected="${statusFilter == '対応中'}">対応中</option>
+                <option value="対応済" th:selected="${statusFilter == '対応済'}">対応済</option>
+            </select>
+            </div>
+            <button type="submit">絞り込み</button>
+        </form>
+
+        <p th:if="${successMessage}" class="msg-ok" th:text="${successMessage}"></p>
+        <p th:if="${errorMessage}" class="msg-ng" th:text="${errorMessage}"></p>
+        <p th:if="${listError}" class="msg-ng" th:text="${listError}"></p>
+
+        <p th:if="${#lists.isEmpty(rows) and listError == null}" class="empty-message">
+            お問い合わせはありません。
+        </p>
+
+        <table th:unless="${#lists.isEmpty(rows)}">
+            <thead>
+                <tr>
+                    <th>内容</th>
+                    <th>権限</th>
+                    <th>所属</th>
+                    <th>名前</th>
+                    <th>ステータス</th>
+                    <th>日時</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="row : ${rows}">
+                    <td th:text="${row.contentPreview}"></td>
+                    <td th:text="${row.authorityLabel}"></td>
+                    <td th:text="${row.affiliationDisplay}"></td>
+                    <td th:text="${row.userName}"></td>
+                    <td th:text="${row.inquiry.inquiryStatus}"></td>
+                    <td th:text="${row.inquiry.inquiryDate}"></td>
+                    <td>
+                        <a th:href="@{/inquiry/{id}(id=${row.inquiry.inquiryId})}">詳細</a>
+                        <form class="inline-form" th:action="@{/inquiry/{id}/delete(id=${row.inquiry.inquiryId})}"
+                              method="post"
+                              onsubmit="return confirm('削除しますか？');">
+                            <button type="submit" class="btn-delete">削除</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+
+    <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+</body>
+</html>

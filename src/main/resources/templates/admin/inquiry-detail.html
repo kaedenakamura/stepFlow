@@ -4,29 +4,54 @@
 	<meta charset="UTF-8">
 	<title>問い合わせ詳細</title>
 	<th:block th:replace="~{common/layout-shell :: layout-styles}"></th:block>
+	<style>
+		.inquiry-detail-container { margin-left: 270px; padding: 24px; }
+		.btn-back { background-color: #2b7a78; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; }
+		.btn-back:hover { background-color: #17252a; }
+		.btn-delete { background-color: #dc3545; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; }
+		.btn-delete:hover { background-color: #b02a37; }
+		.msg-ng { color: red; }
+		.msg-ok { color: green; }
+		.inquiry-info { margin-bottom: 24px; }
+		.inquiry-info p { margin: 8px 0; }
+		.inquiry-status { margin-bottom: 24px; }
+		.inquiry-status select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+		.inquiry-detail { margin-bottom: 24px; }
+		.inquiry-detail p { margin: 8px 0; }
+		.inquiry-date { margin-bottom: 24px; }
+		.inquiry-date p { margin: 8px 0; }
+		.inquiry-date span { font-weight: bold; }
+		.inquiry-date span.ng { color: red; }
+		.inquiry-date span.ok { color: green; }
+		.inquiry-date span.ng::before { content: '✖ '; }
+		.inquiry-date span.ok::before { content: '✓ '; }
+		.inquiry-date span.ng::after { content: ' (NG)'; }
+		.inquiry-date span.ok::after { content: ' (OK)'; }
+		.inquiry-date span.ng::before { content: '✖ '; }
+		.inquiry-date span.ok::before { content: '✓ '; }
+	</style>
 </head>
 <body>
-	<button type="button" class="menu-trigger" id="js-hamburger">☰</button>
-	<div th:replace="~{common/sidebar :: sidebar-fragment}"></div>
-	<main class="main-content">
-		<a th:href="@{/admin/inquiries}">一覧へ</a>
-		<p th:if="${successMessage}" th:text="${successMessage}"></p>
-		<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
-		<p th:text="${inquiry.inquiryDetail}"></p>
-		<p>送信者: <span th:text="${sender != null ? sender.userName : '(不明)'}"></span></p>
-		<p>所属: <span th:text="${affiliationDisplay}"></span></p>
-		<form th:action="@{/admin/inquiries/{id}/status(id=${inquiry.inquiryId})}" method="post">
-			<select name="inquiryStatus">
-				<option value="未対応" th:selected="${inquiry.inquiryStatus == '未対応'}">未対応</option>
-				<option value="対応中" th:selected="${inquiry.inquiryStatus == '対応中'}">対応中</option>
-				<option value="対応済" th:selected="${inquiry.inquiryStatus == '対応済'}">対応済</option>
-			</select>
-			<button type="submit">保存</button>
-		</form>
-		<form th:action="@{/admin/inquiries/{id}/delete(id=${inquiry.inquiryId})}" method="post">
-			<button type="submit">削除</button>
-		</form>
-	</main>
-	<th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
+
+<div class="inquiry-detail-container">
+	<a class="btn-back" th:href="@{/admin/inquiries}">一覧へ</a>
+	<p class="msg-ok" th:if="${successMessage}" th:text="${successMessage}"></p>
+	<p class="msg-ng" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+	<p class="inquiry-detail" th:text="${inquiry.inquiryDetail}"></p>
+	<p class="inquiry-info">送信者: <span th:text="${sender != null ? sender.userName : '(不明)'}"></span></p>
+	<p class="inquiry-info">所属: <span th:text="${affiliationDisplay}"></span></p>
+	<form th:action="@{/admin/inquiries/{id}/status(id=${inquiry.inquiryId})}" method="post">
+		<select class="inquiry-status" name="inquiryStatus">
+			<option value="未対応" th:selected="${inquiry.inquiryStatus == '未対応'}">未対応</option>
+			<option value="対応中" th:selected="${inquiry.inquiryStatus == '対応中'}">対応中</option>
+			<option value="対応済" th:selected="${inquiry.inquiryStatus == '対応済'}">対応済</option>
+		</select>
+		<button class="btn-save" type="submit">保存</button>
+	</form>
+	<form th:action="@{/admin/inquiries/{id}/delete(id=${inquiry.inquiryId})}" method="post">
+		<button class="btn-delete" type="submit">削除</button>
+	</form>
+</div>
+ <th:block th:replace="~{common/layout-shell :: layout-scripts}"></th:block>
 </body>
 </html>

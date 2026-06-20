@@ -13,5 +13,11 @@ import java.util.List;
 public interface ShopRepository extends JpaRepository<Shop, Integer>{
 	/** delete_flag=0 を shop_id 降順で取得（管理者一覧） */
 	List<Shop> findByDeleteFlagOrderByShopIdDesc(Integer deleteFlag);
+
+	/** 有効・住所部分一致で絞り込み（管理者一覧） */
+	List<Shop> findByDeleteFlagAndShopAddressContainingOrderByShopIdDesc(
+			Integer deleteFlag, String shopAddress);
+
+	Shop findByShopIdAndDeleteFlag(Integer shopId, Integer deleteFlag);
 }
 
